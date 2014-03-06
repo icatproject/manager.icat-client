@@ -9,10 +9,11 @@
     <version>0.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>client-4.3.1</artifactId>
+  <artifactId>icat-client-4.3.1</artifactId>
   <packaging>jar</packaging>
 
-  <name>client-4.3.1</name>
+  <name>ICAT client 4.3.1</name>
+  <description>Implementation of the ICAT client API for ICAT version 4.3.1</description>
 
 	<repositories>
 		<repository>
@@ -30,7 +31,7 @@
   	<!-- ICAT -->
 	<dependency>
 		<groupId>fr.esrf.icat</groupId>
-		<artifactId>client-api</artifactId>
+		<artifactId>icat-client-api</artifactId>
 		<version>${project.version}</version>
 	</dependency>
   
@@ -39,6 +40,12 @@
 		<groupId>org.icatproject</groupId>
 		<artifactId>icat.client</artifactId>
 		<version>4.3.1</version>
+		<exclusions>
+			<exclusion>
+				<artifactId>icat.ear</artifactId>
+				<groupId>org.icatproject</groupId>
+			</exclusion>
+		</exclusions>
 	</dependency>
 
 	<!-- seems needed for ICAT client  -->

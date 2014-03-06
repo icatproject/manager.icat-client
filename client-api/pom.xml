@@ -5,14 +5,15 @@
   
   <parent>
     <groupId>fr.esrf.icat</groupId>
-    <artifactId>client-parent</artifactId>
+    <artifactId>icat-client-parent</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
   
-  <artifactId>client-api</artifactId>
+  <artifactId>icat-client-api</artifactId>
   <packaging>jar</packaging>
   
   <name>ICAT client API</name>
+  <description>Client definition and helper classes for ICAT. Implementors are likely linked to a given ICAT version unlike this API.</description>
 
   <build>
     <plugins>
