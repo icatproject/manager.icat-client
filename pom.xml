@@ -4,16 +4,17 @@
   
   <parent>
   	<groupId>fr.esrf.icat</groupId>
-  	<artifactId>super-pom</artifactId>
+  	<artifactId>icat-super-pom</artifactId>
   	<version>1.0</version>
   </parent>
 
-  <artifactId>client-parent</artifactId>
+  <artifactId>icat-client-parent</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   
-  <name>Parent pom for ICAT client</name>
-  
+  <name>ICAT client parent pom</name>
+  <description>ICAT client parent and aggregating pom.</description>
+
   <modules>
     <module>client-api</module>
     <module>client-4.3.1</module>
