@@ -5,7 +5,7 @@
 
   <parent>
     <groupId>fr.esrf.icat</groupId>
-    <artifactId>client-parent</artifactId>
+    <artifactId>icat-client-parent</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
 
@@ -15,24 +15,12 @@
   <name>ICAT client 4.3.1</name>
   <description>Implementation of the ICAT client API for ICAT version 4.3.1</description>
 
-	<repositories>
-		<repository>
-			<id>icat</id>
-			<name>ICAT Repository</name>
-			<url>http://www.icatproject.org/mvn/repo</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
   <dependencies>
   	
   	<!-- ICAT -->
 	<dependency>
 		<groupId>fr.esrf.icat</groupId>
 		<artifactId>icat-client-api</artifactId>
-		<version>${project.version}</version>
 	</dependency>
   
   	<!-- ICAT -->

@@ -19,5 +19,26 @@
     <module>client-api</module>
     <module>client-4.3.1</module>
   </modules>
+ 
+  <repositories>
+	<repository>
+		<id>icat</id>
+		<name>ICAT Repository</name>
+		<url>http://www.icatproject.org/mvn/repo</url>
+		<snapshots>
+			<enabled>false</enabled>
+		</snapshots>
+	</repository>
+  </repositories>
+
+  <dependencyManagement>
+  	<dependencies>
+  		<dependency>
+  			<groupId>fr.esrf.icat</groupId>
+  			<artifactId>icat-client-api</artifactId>
+  			<version>${project.version}</version>
+  		</dependency>
+  	</dependencies>
+  </dependencyManagement>
   
 </project>
