@@ -2,9 +2,6 @@ package fr.esrf.icat.client;
 
 import java.util.GregorianCalendar;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 public abstract class ICATClient {
 
 	protected static final String ICAT_SERVICE_NAME = "ICATService";
@@ -53,10 +50,8 @@ public abstract class ICATClient {
 		this.icatPassword = icatPassword;
 	}
 
-	@PostConstruct
 	public abstract void init();
 	
-	@PreDestroy
 	public abstract void stop();
 	
 	public abstract void deleteEntities(String entityName, Long... ids) throws ICATClientException;
