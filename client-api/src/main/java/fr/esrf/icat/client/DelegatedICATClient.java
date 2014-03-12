@@ -20,6 +20,36 @@ public abstract class DelegatedICATClient extends ICATClient {
 	}
 
 	@Override
+	public void doInit() {
+		delegate.doInit();
+	}
+
+	@Override
+	public long initiateConnection() throws ICATClientException {
+		return delegate.initiateConnection();
+	}
+
+	@Override
+	public long refreshConnection() throws ICATClientException {
+		return delegate.refreshConnection();
+	}
+
+	@Override
+	public void closeConnection() {
+		delegate.closeConnection();
+	}
+
+	@Override
+	public void doStop() {
+		delegate.doStop();
+	}
+
+	@Override
+	public void populateObjectCache() throws ICATClientException {
+		delegate.populateObjectCache();
+	}
+
+	@Override
 	public boolean investigationExists(final String investigation) throws ICATClientException {
 		return delegate.investigationExists(investigation);
 	}

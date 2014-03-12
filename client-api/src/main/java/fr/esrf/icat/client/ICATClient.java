@@ -10,6 +10,14 @@ public abstract class ICATClient {
 
 	protected static final String ICAT_SERVICE_URL = "/ICATService/ICAT?wsdl";
 
+	public static final long ONE_MINUTE_IN_MS = 60 * 1000l;
+	
+	/**
+	 * Time before current session expires when we will perform a refresh.
+	 * Set to 5 minutes.
+	 */
+	private static final long REFRESH_DELAY = 5 * ONE_MINUTE_IN_MS;
+
 	private String icatBaseUrl;
 	
 	private String icatAuthnPlugin;
@@ -17,6 +25,16 @@ public abstract class ICATClient {
 	private String icatUsername;
 
 	private String icatPassword;
+	
+	private volatile long expiringTime; 
+	
+	private Object sessionLock;
+ 
+	public ICATClient() {
+		super();
+		expiringTime = 0l;
+		sessionLock = new Object();
+	}
 
 	public String getIcatBaseUrl() {
 		return icatBaseUrl;
@@ -50,10 +68,73 @@ public abstract class ICATClient {
 		this.icatPassword = icatPassword;
 	}
 
-	public abstract void init();
+	/**
+	 * Method that check whether the current session is still valid. 
+	 * Has to be called before any call to the web service.
+	 * Delegates actual connection/refresh operation to the implementor.
+	 * @throws ICATClientException 
+	 * 
+	 */
+	public final void checkConnection() throws ICATClientException {
+		long now = System.currentTimeMillis();
+		if(now > expiringTime) {
+			synchronized (sessionLock) {
+				if(now > expiringTime) {
+					expiringTime = initiateConnection();
+				}
+			}
+		} else if ((expiringTime - now) < REFRESH_DELAY) {
+			synchronized (sessionLock) {
+				if ((expiringTime - now) < REFRESH_DELAY) {
+					expiringTime = refreshConnection();
+				}
+			}
+		}
+	}
 	
-	public abstract void stop();
+	public final void init() throws ICATClientException {
+		doInit();
+		expiringTime = initiateConnection();
+		populateObjectCache();
+	}
 	
+	/**
+	 * Init method for implementors. After this method is called the client has to be able to connect to ICAT.
+	 */
+	public void doInit() {
+	}
+
+	public final void stop() {
+		doStop();
+		if(System.currentTimeMillis() < expiringTime) {
+			closeConnection();
+		}
+	}
+	
+	/**
+	 * Cleanup method for implementors. Called by stop() before closing the session. 
+	 */
+	public void doStop() {
+	}
+
+	/**
+	 * Initiate an ICAT session.
+	 * @return the expiring time (in currentTimeInMillis units).
+	 * @throws ICATClientException
+	 */
+	public abstract long initiateConnection() throws ICATClientException;
+	
+	/**
+	 * Refresh the ICAT session.
+	 * @return the new expiring time (in currentTimeInMillis units).
+	 * @throws ICATClientException
+	 */
+	public abstract long refreshConnection() throws ICATClientException;
+	
+	public abstract void closeConnection();
+	
+	public abstract void populateObjectCache() throws ICATClientException;
+
 	public abstract void deleteEntities(String entityName, Long... ids) throws ICATClientException;
 	
 	public abstract boolean investigationExists(String investigation) throws ICATClientException;

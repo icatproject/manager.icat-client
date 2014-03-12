@@ -3,7 +3,9 @@ package fr.esrf.icat.client.v4_3_1;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -45,10 +47,18 @@ public class ICATClientImpl extends ICATClient {
 	
 	private DatasetType dtsType;
 	
+	private Map<String, Instrument> cachedInstruments;
+	
+	private Map<String, DatafileFormat> cachedDatafileFormats;
+
+	private Map<String, InvestigationType> cachedInvestigationTypes;
+	
+	private Map<String, ParameterType> cachedParameterType;
+
 	private DatatypeFactory datatypeFactory;
 
 	@Override
-	public void init() {
+	public void doInit() {
 		try {
 			datatypeFactory = DatatypeFactory.newInstance();
 			URL base = new URL(getIcatBaseUrl());
@@ -60,13 +70,13 @@ public class ICATClientImpl extends ICATClient {
 			if(LOG.isDebugEnabled()) {
 				LOG.debug("ICAT Version: "+ icat.getApiVersion());
 			}
-			connect();
 		} catch (IcatException_Exception | DatatypeConfigurationException | MalformedURLException e) {
 			throw new IllegalStateException("Unable to initialise ICATClient v4.3.1", e);
 		}
 	}
 
-	private void connect() throws IcatException_Exception {
+	@Override
+	public long initiateConnection() throws ICATClientException {
 		LOG.debug("Connecting to ICAT as '" + getIcatUsername() + "'");
 
 		Credentials credentials = new Credentials();
@@ -81,23 +91,31 @@ public class ICATClientImpl extends ICATClient {
 		e.setValue(getIcatPassword());
 		entries.add(e);
 		
-		sessionId = icat.login(getIcatAuthnPlugin(), credentials);
-		LOG.debug("Connected to ICAT [" + sessionId + "]");
-		
-		facility = (Facility) icat.search(sessionId, "Facility [name='ESRF']").get(0);
-		dtsType = (DatasetType) icat.search(sessionId, "DatasetType [name='acquisition' AND facility.id='" + facility.getId() + "']").get(0);
-	}
-	
-	private void reconnect() throws IcatException_Exception {
-		if(null == icat || icat.getRemainingMinutes(sessionId) <= 0) {
-			connect();
-		} else {
-			icat.refresh(sessionId);
+		try {
+			sessionId = icat.login(getIcatAuthnPlugin(), credentials);
+			LOG.debug("Connected to ICAT [" + sessionId + "]");
+			long remainingMinutes = (long) Math.floor(icat.getRemainingMinutes(sessionId));
+			return System.currentTimeMillis() + remainingMinutes * ONE_MINUTE_IN_MS;
+		} catch (IcatException_Exception e1) {
+			LOG.error("Unable to create connection", e1);
+			throw new ICATClientException(e1);
 		}
 	}
 
 	@Override
-	public void stop() {
+	public long refreshConnection() throws ICATClientException {
+		try {
+			icat.refresh(sessionId);
+			long remainingMinutes = (long) Math.floor(icat.getRemainingMinutes(sessionId));
+			return System.currentTimeMillis() + remainingMinutes * ONE_MINUTE_IN_MS;
+		} catch (IcatException_Exception e) {
+			LOG.error("Unable to refresh connection", e);
+			throw new ICATClientException(e);
+		}
+	}
+
+	@Override
+	public void closeConnection() {
 		if(null != icat && null != sessionId) {
 			try {
 				LOG.debug("Closing session " + sessionId);
@@ -112,15 +130,58 @@ public class ICATClientImpl extends ICATClient {
 	}
 
 	@Override
+	public void populateObjectCache() throws ICATClientException {
+		try {
+			facility = (Facility) icat.search(sessionId, "Facility [name='ESRF']").get(0);
+			dtsType = (DatasetType) icat.search(sessionId, "DatasetType [name='acquisition' AND facility.id='" + facility.getId() + "']").get(0);
+			
+			// cached instruments
+			List<? extends Object> instruments = icat.search(sessionId, "Instrument [facility.id='" + facility.getId() + "']");
+			cachedInstruments = new HashMap<String, Instrument>(instruments.size());
+			for(Object o : instruments) {
+				Instrument ins = (Instrument) o;
+				cachedInstruments.put(ins.getName(), ins);
+			}
+			
+			// cached datafileFormats
+			List<? extends Object> datafileFormats = icat.search(sessionId, "DatafileFormat [facility.id='" + facility.getId() + "']");
+			cachedDatafileFormats = new HashMap<String, DatafileFormat>(datafileFormats.size());
+			for(Object o : datafileFormats) {
+				DatafileFormat dtff = (DatafileFormat) o;
+				cachedDatafileFormats.put(dtff.getName(), dtff);
+			}
+
+			// cached InvestigationTypes
+			List<? extends Object> investigationTypes = icat.search(sessionId, "InvestigationType [facility.id='" + facility.getId() + "']");
+			cachedInvestigationTypes = new HashMap<String, InvestigationType>(investigationTypes.size());
+			for(Object o : investigationTypes) {
+				InvestigationType invt = (InvestigationType) o;
+				cachedInvestigationTypes.put(invt.getName(), invt);
+			}
+
+			// cached ParameterTypes
+			List<? extends Object> parameterTypes = icat.search(sessionId, "ParameterType [facility.id='" + facility.getId() + "']");
+			cachedParameterType = new HashMap<String, ParameterType>(parameterTypes.size());
+			for(Object o : parameterTypes) {
+				ParameterType paramt = (ParameterType) o;
+				cachedParameterType.put(paramt.getName(), paramt);
+			}
+
+		} catch (IcatException_Exception e) {
+			throw new ICATClientException(e);
+		}
+	}
+
+	@Override
 	public boolean investigationExists(final String investigation) throws ICATClientException {
 		try {
-			reconnect();
+			checkConnection();
 			List<Object> response = icat.search(sessionId, "Investigation [name ='" + investigation + "']");
 			if(LOG.isDebugEnabled()) {
-				LOG.debug((response.size() > 0 ? "Found " + response.size() + " Investigation" : "Found no Investigation")
+				LOG.debug(((null != response && response.size() > 0) ? "Found " + response.size() + " Investigation" : "Found no Investigation")
 						+ " with name " + investigation);
 			}
-			return response.size() == 1;
+			return null != response && response.size() == 1;
 		} catch (IcatException_Exception e) {
 			LOG.error("Unable to check investigation " + investigation, e);
 			throw new ICATClientException(e);
@@ -130,7 +191,7 @@ public class ICATClientImpl extends ICATClient {
 	@Override
 	public long createInvestigation(final String name, final String type, final String visit, final String title, final String instrument) throws ICATClientException {
 		try {
-			reconnect();
+			checkConnection();
 			Investigation icatInvestigation = new Investigation();
 			icatInvestigation.setFacility(facility);
 			InvestigationType invtype = getInvestigationType(type);
@@ -152,7 +213,7 @@ public class ICATClientImpl extends ICATClient {
 	@Override
 	public long createDataset(final String investigation, final String visit, final String name, final String location, final GregorianCalendar date) throws ICATClientException {
 		try {
-			reconnect();
+			checkConnection();
 			// retrieve the investigation
 			Investigation inv = getInvestigation(investigation, visit);
 			// create the dataset
@@ -171,14 +232,14 @@ public class ICATClientImpl extends ICATClient {
 		}
 	}
 
-	private void createInvestigationInstrumentIfAbsent(final Instrument inst, final Investigation inv) throws IcatException_Exception {
+	private void createInvestigationInstrumentIfAbsent(final Instrument inst, final Investigation inv) throws IcatException_Exception, ICATClientException {
 		if(!investigationInstrumentExists(inst, inv)) {
 			createInvestigationInstrument(inst, inv);
 		}
 	}
 	
-	private boolean investigationInstrumentExists(final Instrument inst, final Investigation inv) throws IcatException_Exception {
-		reconnect();
+	private boolean investigationInstrumentExists(final Instrument inst, final Investigation inv) throws IcatException_Exception, ICATClientException {
+		checkConnection();
 		List<Object> response = icat.search(sessionId, "InvestigationInstrument [instrument.id = '" + inst.getId() + "' AND investigation.id = '" + inv.getId() + "']");
 		return response.size() == 1;
 	}
@@ -194,7 +255,7 @@ public class ICATClientImpl extends ICATClient {
 	@Override
 	public long createDatafile(final long datasetID, final String filename, final String location, final String format) throws ICATClientException {
 		try {
-			reconnect();
+			checkConnection();
 			// retrieve the dataset
 			Dataset dts = (Dataset) icat.get(sessionId, "Dataset", datasetID);
 			// retrieve the dataformat
@@ -215,7 +276,7 @@ public class ICATClientImpl extends ICATClient {
 	@Override
 	public long createDatasetParameter(final long datasetID, final String parameter, final String value) throws ICATClientException {
 		try {
-			reconnect();
+			checkConnection();
 			// retrieve the dataset
 			Dataset dts = (Dataset) icat.get(sessionId, "Dataset", datasetID);
 			// retrieve the parameter type
@@ -243,34 +304,66 @@ public class ICATClientImpl extends ICATClient {
 	}
 
 
-	private Instrument getInstrument(final String instrument) throws IcatException_Exception {
-		reconnect();
+	private Instrument getInstrument(final String instrument) throws IcatException_Exception, ICATClientException {
+		Instrument inst = cachedInstruments.get(instrument);
+		if(null != inst) {
+			return inst;
+		}
+		checkConnection();
 		List<Object> response = icat.search(sessionId, "Instrument [name ='" + instrument  + "' AND facility.id = '" + facility.getId() + "']");
-		return (Instrument) ((null == response || response.size() == 0) ? null : response.get(0));
+		inst = (Instrument) ((null == response || response.size() == 0) ? null : response.get(0));
+		if(null != inst) {
+			cachedInstruments.put(instrument, inst);
+		}
+		return inst;
 	}
 
-	private Investigation getInvestigation(final String investigation, final String visit) throws IcatException_Exception {
-		reconnect();
+	private Investigation getInvestigation(final String investigation, final String visit) throws IcatException_Exception, ICATClientException {
+		checkConnection();
 		List<Object> response = icat.search(sessionId, "Investigation [name ='" + investigation + "' AND visitId = '" + visit + "' AND facility.id = '" + facility.getId() +"']");
 		return (Investigation) ((null == response || response.size() == 0) ? null : response.get(0));
 	}
 
-	private DatafileFormat getDatafileFormat(final String format) throws IcatException_Exception {
-		reconnect();
+	private DatafileFormat getDatafileFormat(final String format) throws IcatException_Exception, ICATClientException {
+		DatafileFormat dtff = cachedDatafileFormats.get(format);
+		if(null != dtff) { 
+			return dtff;
+		}
+		checkConnection();
 		List<Object> response = icat.search(sessionId, "DatafileFormat [name ='" + format + "' AND facility.id = '" + facility.getId() + "']");
-		return (DatafileFormat) ((null == response || response.size() == 0) ? null : response.get(0));
+		dtff = (DatafileFormat) ((null == response || response.size() == 0) ? null : response.get(0));
+		if(null != dtff) {
+			cachedDatafileFormats.put(format, dtff);
+		}
+		return dtff;
 	}
 
-	private InvestigationType getInvestigationType(final String type) throws IcatException_Exception {
-		reconnect();
+	private InvestigationType getInvestigationType(final String type) throws IcatException_Exception, ICATClientException {
+		InvestigationType invt = cachedInvestigationTypes.get(type);
+		if(null != invt) {
+			return invt;
+		}
+		checkConnection();
 		List<Object> response = icat.search(sessionId, "InvestigationType [name ='" + type + "' AND facility.id = '" + facility.getId() + "']");
-		return (InvestigationType) ((null == response || response.size() == 0) ? null : response.get(0));
+		invt = (InvestigationType) ((null == response || response.size() == 0) ? null : response.get(0));
+		if(null != invt) {
+			cachedInvestigationTypes.put(type, invt);
+		}
+		return invt;
 	}
 
-	private ParameterType getParameterType(final String parameter) throws IcatException_Exception {
-		reconnect();
+	private ParameterType getParameterType(final String parameter) throws IcatException_Exception, ICATClientException {
+		ParameterType paramt = cachedParameterType.get(parameter);
+		if(null != paramt) {
+			return paramt;
+		}
+		checkConnection();
 		List<Object> response = icat.search(sessionId, "ParameterType [name ='" + parameter + "' AND facility.id = '" + facility.getId() + "']");
-		return (ParameterType) ((null == response || response.size() == 0) ? null : response.get(0));
+		paramt = (ParameterType) ((null == response || response.size() == 0) ? null : response.get(0));
+		if(null != paramt) {
+			cachedParameterType.put(parameter, paramt);
+		}
+		return paramt;
 	}
 
 	private long create(EntityBaseBean entity)  throws IcatException_Exception {
@@ -295,12 +388,11 @@ public class ICATClientImpl extends ICATClient {
 		query.setCharAt(query.length() - 1, ')');
 		query.append("]");
 		try {
-			reconnect();
+			checkConnection();
 			List<? extends Object> result = icat.search(sessionId, query.toString());
 			icat.deleteMany(sessionId, (List<EntityBaseBean>) result);
 		} catch (IcatException_Exception e) {
 			throw new ICATClientException(e);
 		}
 	}
-
 }

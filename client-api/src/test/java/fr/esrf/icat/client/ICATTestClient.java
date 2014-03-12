@@ -19,15 +19,15 @@ public class ICATTestClient extends DelegatedICATClient {
 
 	private List<Long> datasetList;
 
-	@Override
-	public void init() {
+	public ICATTestClient() {
+		super();
 		LOG.warn("Setting up ICAT client for automatic rollback at shutdown");
 		investigationList = new LinkedList<Long>();
 		datasetList = new LinkedList<Long>();
 	}
 
 	@Override
-	public void stop() {
+	public void doStop() {
 		try {
 			LOG.debug("Removing created Entities from ICAT");
 			deleteEntities(ENTITY_DATASET, datasetList.toArray(new Long[datasetList.size()]));
