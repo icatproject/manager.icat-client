@@ -2,8 +2,10 @@ package fr.esrf.icat.client.v4_3_1;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,10 +34,14 @@ import org.icatproject_4_3_1.ParameterValueType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.esrf.icat.client.DatafileDTO;
+import fr.esrf.icat.client.DatasetParameterDTO;
 import fr.esrf.icat.client.ICATClient;
 import fr.esrf.icat.client.ICATClientException;
 
 public class ICATClientImpl extends ICATClient {
+
+	private static final String ENTITY_DATASET = "Dataset";
 
 	private final static Logger LOG = LoggerFactory.getLogger(ICATClient.class);
 	
@@ -257,7 +263,7 @@ public class ICATClientImpl extends ICATClient {
 		try {
 			checkConnection();
 			// retrieve the dataset
-			Dataset dts = (Dataset) icat.get(sessionId, "Dataset", datasetID);
+			Dataset dts = (Dataset) icat.get(sessionId, ENTITY_DATASET, datasetID);
 			// retrieve the dataformat
 			DatafileFormat fmt = getDatafileFormat(format);
 			// create datafile
@@ -272,19 +278,45 @@ public class ICATClientImpl extends ICATClient {
 			throw new ICATClientException(e);
 		}
 	}
+	
+	@Override
+	public void createDatafiles(long datasetID, Collection<DatafileDTO> datafileCollection) throws ICATClientException {
+		try {
+			checkConnection();
+			// retrieve the dataset
+			Dataset dts = (Dataset) icat.get(sessionId, ENTITY_DATASET, datasetID);
+			
+			List<EntityBaseBean> dtfCollection = new LinkedList<EntityBaseBean>();
+			for(DatafileDTO dtfd : datafileCollection) {
+				// retrieve the dataformat
+				DatafileFormat fmt = getDatafileFormat(dtfd.getFormat());
+				// create datafile
+				Datafile dtf = new Datafile();
+				dtf.setDataset(dts);
+				dtf.setName(dtfd.getFilename());
+				dtf.setLocation(dtfd.getLocation());
+				dtf.setDatafileFormat(fmt);
+				dtfCollection.add(dtf);
+			}
+			
+			icat.createMany(sessionId, dtfCollection);
+		} catch (IcatException_Exception e) {
+			LOG.error("Unable to create datafiles for dataset [" + datasetID + "]", e);
+			throw new ICATClientException(e);
+		}
+	}
 
 	@Override
 	public long createDatasetParameter(final long datasetID, final String parameter, final String value) throws ICATClientException {
 		try {
 			checkConnection();
 			// retrieve the dataset
-			Dataset dts = (Dataset) icat.get(sessionId, "Dataset", datasetID);
+			Dataset dts = (Dataset) icat.get(sessionId, ENTITY_DATASET, datasetID);
 			// retrieve the parameter type
 			ParameterType type = getParameterType(parameter);
 			// check it is not null
 			if(null == type) {
-				LOG.error("Parameter does no exist: " + parameter);
-				return -1;
+				throw new ICATClientException("Parameter type does not exist: " + type);
 			}
 			DatasetParameter dtsparam = new DatasetParameter();
 			dtsparam.setDataset(dts);
@@ -303,6 +335,40 @@ public class ICATClientImpl extends ICATClient {
 		}
 	}
 
+	@Override
+	public void createDatasetParameters(long datasetID, Collection<DatasetParameterDTO> datasetParamCollection) throws ICATClientException {
+		try {
+			checkConnection();
+			// retrieve the dataset
+			Dataset dts = (Dataset) icat.get(sessionId, ENTITY_DATASET, datasetID);
+			
+			List<EntityBaseBean> dtspCollection = new LinkedList<EntityBaseBean>();
+			for(DatasetParameterDTO dtspd : datasetParamCollection) {
+				// retrieve the parameter type
+				ParameterType type = getParameterType(dtspd.getParameter());
+				// check it is not null
+				if(null == type) {
+					throw new ICATClientException("Parameter type does not exist: " + type);
+				}
+				DatasetParameter dtsparam = new DatasetParameter();
+				dtsparam.setDataset(dts);
+				dtsparam.setType(type);
+				ParameterValueType valueType = type.getValueType();
+				if(valueType.equals(ParameterValueType.NUMERIC)) {
+					Double dvalue = Double.parseDouble(dtspd.getValue());
+					dtsparam.setNumericValue(dvalue);
+				} else {
+					dtsparam.setStringValue(dtspd.getValue());
+				}
+				dtspCollection.add(dtsparam);
+			}
+			
+			icat.createMany(sessionId, dtspCollection);
+		} catch (IcatException_Exception e) {
+			LOG.error("Unable to create dataset parameters for dataset [" + datasetID + "]", e);
+			throw new ICATClientException(e);
+		}
+	}
 
 	private Instrument getInstrument(final String instrument) throws IcatException_Exception, ICATClientException {
 		Instrument inst = cachedInstruments.get(instrument);

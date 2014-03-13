@@ -1,5 +1,6 @@
 package fr.esrf.icat.client;
 
+import java.util.Collection;
 import java.util.GregorianCalendar;
 
 public abstract class ICATClient {
@@ -144,7 +145,38 @@ public abstract class ICATClient {
 	public abstract long createDataset(String investigation, String instrument, String name, String location, GregorianCalendar date) throws ICATClientException;
 
 	public abstract long createDatafile(long datasetID, String filename, String location, String format)  throws ICATClientException;
+	
+	public long createDatafile(long datasetID, DatafileDTO datafileData) throws ICATClientException {
+		return createDatafile(datasetID, datafileData.getFilename(), datafileData.getLocation(), datafileData.getFormat());
+	}
+	
+	/**
+	 * Default implementation. Override to use creatMany instead of a loop.
+	 * @param datasetID
+	 * @param datafileCollection
+	 * @throws ICATClientException
+	 */
+	public void createDatafiles(long datasetID, Collection<DatafileDTO> datafileCollection) throws ICATClientException {
+		for(DatafileDTO dtfd : datafileCollection) {
+			createDatafile(datasetID, dtfd);
+		}
+	}
 
 	public abstract long createDatasetParameter(long datasetID, String parameter, String value) throws ICATClientException;
-
+	
+	public long createDatasetParameter(long datasetID, DatasetParameterDTO datasetParamData) throws ICATClientException {
+		return createDatasetParameter(datasetID, datasetParamData.getParameter(), datasetParamData.getValue());
+	}
+	
+	/**
+	 * Default implementation. Override to use creatMany instead of a loop.
+	 * @param datasetID
+	 * @param datasetParamCollection
+	 * @throws ICATClientException
+	 */
+	public void createDatasetParameters(long datasetID, Collection<DatasetParameterDTO> datasetParamCollection)  throws ICATClientException {
+		for(DatasetParameterDTO dtspd : datasetParamCollection) {
+			createDatasetParameter(datasetID, dtspd);
+		}
+	}
 }
