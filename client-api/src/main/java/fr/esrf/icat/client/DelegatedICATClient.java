@@ -20,8 +20,12 @@ public abstract class DelegatedICATClient extends ICATClient {
 	}
 
 	@Override
-	public void doInit() {
-		delegate.doInit();
+	public void init() {
+	}
+
+	@Override
+	public void checkConnection() throws ICATClientException {
+		delegate.checkConnection();
 	}
 
 	@Override
@@ -40,8 +44,7 @@ public abstract class DelegatedICATClient extends ICATClient {
 	}
 
 	@Override
-	public void doStop() {
-		delegate.doStop();
+	public void stop() {
 	}
 
 	@Override

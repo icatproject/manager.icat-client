@@ -76,7 +76,7 @@ public abstract class ICATClient {
 	 * @throws ICATClientException 
 	 * 
 	 */
-	public final void checkConnection() throws ICATClientException {
+	public void checkConnection() throws ICATClientException {
 		long now = System.currentTimeMillis();
 		if(now > expiringTime) {
 			synchronized (sessionLock) {
@@ -93,7 +93,7 @@ public abstract class ICATClient {
 		}
 	}
 	
-	public final void init() throws ICATClientException {
+	public void init() throws ICATClientException {
 		doInit();
 		expiringTime = initiateConnection();
 		populateObjectCache();
@@ -105,7 +105,7 @@ public abstract class ICATClient {
 	public void doInit() {
 	}
 
-	public final void stop() {
+	public void stop() {
 		doStop();
 		if(System.currentTimeMillis() < expiringTime) {
 			closeConnection();
