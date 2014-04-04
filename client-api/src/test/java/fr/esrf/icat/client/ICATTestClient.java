@@ -27,7 +27,7 @@ public class ICATTestClient extends DelegatedICATClient {
 	}
 
 	@Override
-	public void doStop() {
+	public void stop() {
 		try {
 			LOG.warn("Removing created Entities from ICAT");
 			deleteEntities(ENTITY_DATASET, datasetList.toArray(new Long[datasetList.size()]));

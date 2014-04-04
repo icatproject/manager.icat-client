@@ -53,8 +53,8 @@ public abstract class DelegatedICATClient extends ICATClient {
 	}
 
 	@Override
-	public boolean investigationExists(final String investigation) throws ICATClientException {
-		return delegate.investigationExists(investigation);
+	public boolean investigationExists(final String investigation, final String visit) throws ICATClientException {
+		return delegate.investigationExists(investigation, visit);
 	}
 
 	@Override

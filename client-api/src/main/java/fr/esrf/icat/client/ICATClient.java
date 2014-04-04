@@ -138,7 +138,7 @@ public abstract class ICATClient {
 
 	public abstract void deleteEntities(String entityName, Long... ids) throws ICATClientException;
 	
-	public abstract boolean investigationExists(String investigation) throws ICATClientException;
+	public abstract boolean investigationExists(String investigation, String visit) throws ICATClientException;
 	
 	public abstract long createInvestigation(String name, String type, String visit, String title, String instrument) throws ICATClientException;
 

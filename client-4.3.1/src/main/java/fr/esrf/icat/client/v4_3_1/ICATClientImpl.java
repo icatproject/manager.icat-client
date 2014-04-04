@@ -179,10 +179,10 @@ public class ICATClientImpl extends ICATClient {
 	}
 
 	@Override
-	public boolean investigationExists(final String investigation) throws ICATClientException {
+	public boolean investigationExists(final String investigation, final String visit) throws ICATClientException {
 		try {
 			checkConnection();
-			List<Object> response = icat.search(sessionId, "Investigation [name ='" + investigation + "']");
+			List<Object> response = icat.search(sessionId, "Investigation [name ='" + investigation + "' AND visitId = '" + visit + "' AND facility.id = " + facility.getId() + "]");
 			if(LOG.isDebugEnabled()) {
 				LOG.debug(((null != response && response.size() > 0) ? "Found " + response.size() + " Investigation" : "Found no Investigation")
 						+ " with name " + investigation);
