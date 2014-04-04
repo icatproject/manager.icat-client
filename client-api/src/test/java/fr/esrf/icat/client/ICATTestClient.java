@@ -41,15 +41,15 @@ public class ICATTestClient extends DelegatedICATClient {
 	}
 
 	@Override
-	public long createInvestigation(final String name, final String type, final String visit, final String title, final String instrument) throws ICATClientException {
-		long id = super.createInvestigation(name, type, visit, title, instrument);
+	public long createInvestigation(final String name, final String type, final String visit, final String title, final String instrument, final GregorianCalendar startDate) throws ICATClientException {
+		long id = super.createInvestigation(name, type, visit, title, instrument, startDate);
 		investigationList.add(id);
 		return id;
 	}
 
 	@Override
-	public long createDataset(final String investigation, final String instrument, final String name, final String location, final GregorianCalendar date) throws ICATClientException {
-		long id = super.createDataset(investigation, instrument, name, location, date);
+	public long createDataset(final String investigation, final String instrument, final String name, final String location, final GregorianCalendar startDate, final GregorianCalendar endDate) throws ICATClientException {
+		long id = super.createDataset(investigation, instrument, name, location, startDate, endDate);
 		datasetList.add(id);
 		return id;
 	}

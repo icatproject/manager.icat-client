@@ -140,9 +140,9 @@ public abstract class ICATClient {
 	
 	public abstract boolean investigationExists(String investigation, String visit) throws ICATClientException;
 	
-	public abstract long createInvestigation(String name, String type, String visit, String title, String instrument) throws ICATClientException;
+	public abstract long createInvestigation(String name, String type, String visit, String title, String instrument, GregorianCalendar startDate) throws ICATClientException;
 
-	public abstract long createDataset(String investigation, String instrument, String name, String location, GregorianCalendar date) throws ICATClientException;
+	public abstract long createDataset(String investigation, String instrument, String name, String location, GregorianCalendar startDate, GregorianCalendar endDate) throws ICATClientException;
 
 	public abstract long createDatafile(long datasetID, String filename, String location, String format)  throws ICATClientException;
 	

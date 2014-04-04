@@ -195,7 +195,7 @@ public class ICATClientImpl extends ICATClient {
 	}
 
 	@Override
-	public long createInvestigation(final String name, final String type, final String visit, final String title, final String instrument) throws ICATClientException {
+	public long createInvestigation(final String name, final String type, final String visit, final String title, final String instrument, final GregorianCalendar startDate) throws ICATClientException {
 		try {
 			checkConnection();
 			Investigation icatInvestigation = new Investigation();
@@ -205,6 +205,9 @@ public class ICATClientImpl extends ICATClient {
 			icatInvestigation.setVisitId(visit);
 			icatInvestigation.setName(name);
 			icatInvestigation.setTitle(title);
+			if(null != startDate) {
+				icatInvestigation.setStartDate(datatypeFactory.newXMLGregorianCalendar(startDate));
+			}
 			create(icatInvestigation);
 			// check investigation instrument exists, create it if not
 			Instrument inst = getInstrument(instrument.toUpperCase());
@@ -217,7 +220,7 @@ public class ICATClientImpl extends ICATClient {
 	}
 
 	@Override
-	public long createDataset(final String investigation, final String visit, final String name, final String location, final GregorianCalendar date) throws ICATClientException {
+	public long createDataset(final String investigation, final String visit, final String name, final String location, final GregorianCalendar startDate, final GregorianCalendar endDate) throws ICATClientException {
 		try {
 			checkConnection();
 			// retrieve the investigation
@@ -227,13 +230,16 @@ public class ICATClientImpl extends ICATClient {
 			dataset.setInvestigation(inv);
 			dataset.setName(name);
 			dataset.setLocation(location);
-			if(null != date) {
-				dataset.setEndDate(datatypeFactory.newXMLGregorianCalendar(date));
+			if(null != endDate) {
+				dataset.setEndDate(datatypeFactory.newXMLGregorianCalendar(endDate));
+			}
+			if(null != startDate) {
+				dataset.setStartDate(datatypeFactory.newXMLGregorianCalendar(startDate));
 			}
 			dataset.setType(dtsType);
 			return create(dataset);
 		} catch (IcatException_Exception e) {
-			LOG.error("Unable to create dataset [" + investigation + ", " + visit + ", " + name + ", " + location + ", " + date + "]", e);
+			LOG.error("Unable to create dataset [" + investigation + ", " + visit + ", " + name + ", " + location + "]", e);
 			throw new ICATClientException(e);
 		}
 	}
