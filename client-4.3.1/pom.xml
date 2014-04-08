@@ -62,7 +62,7 @@
 	            <goals>
 	              <goal>update-project-license</goal>
 	            </goals>
-	            <phase>process-resources</phase>
+	            <phase>generate-resources</phase>
 	          </execution>
 	          <execution>
 	            <id>headers</id>
@@ -76,7 +76,7 @@
 	            <goals>
 	              <goal>update-file-header</goal>
 	            </goals>
-	            <phase>process-resources</phase>
+	            <phase>process-sources</phase>
 	          </execution>
 	        </executions>
 	      </plugin>   	  
