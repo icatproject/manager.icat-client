@@ -400,7 +400,7 @@ public class ICATClientImpl extends ICATClient {
 
 	private Investigation getInvestigation(final String investigation, final String visit) throws IcatException_Exception, ICATClientException {
 		checkConnection();
-		List<Object> response = icat.search(sessionId, "Investigation [name ='" + investigation + "' AND visitId = '" + visit + "' AND facility.id = '" + facility.getId() +"']");
+		List<Object> response = icat.search(sessionId, "Investigation INCLUDE 1 [name ='" + investigation + "' AND visitId = '" + visit + "' AND facility.id = '" + facility.getId() +"']");
 		return (Investigation) ((null == response || response.size() == 0) ? null : response.get(0));
 	}
 
