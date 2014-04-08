@@ -45,4 +45,41 @@
   
   </dependencies>
 
+	<build>
+		<plugins>
+	      <plugin>
+	        <groupId>org.codehaus.mojo</groupId>
+	        <artifactId>license-maven-plugin</artifactId>
+	        <configuration>
+	          <licenseName>gpl_v3</licenseName>
+	        </configuration>
+	        <executions>
+	          <execution>
+	            <id>license</id>
+		        <configuration>
+					<generateBundle>true</generateBundle>
+		        </configuration>
+	            <goals>
+	              <goal>update-project-license</goal>
+	            </goals>
+	            <phase>process-resources</phase>
+	          </execution>
+	          <execution>
+	            <id>headers</id>
+		        <configuration>
+		          <verbose>false</verbose>
+		          <addSvnKeyWords>false</addSvnKeyWords>
+					<extraExtensions>
+						<xsd>xml</xsd>
+					</extraExtensions>
+		        </configuration>
+	            <goals>
+	              <goal>update-file-header</goal>
+	            </goals>
+	            <phase>process-resources</phase>
+	          </execution>
+	        </executions>
+	      </plugin>   	  
+		</plugins>
+	</build>
 </project>
