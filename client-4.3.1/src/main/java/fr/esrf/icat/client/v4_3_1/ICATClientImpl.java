@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 
 import org.icatproject_4_3_1.Datafile;
@@ -230,14 +231,21 @@ public class ICATClientImpl extends ICATClient {
 			dataset.setInvestigation(inv);
 			dataset.setName(name);
 			dataset.setLocation(location);
+			XMLGregorianCalendar endDateXMLCal = null;
 			if(null != endDate) {
-				dataset.setEndDate(datatypeFactory.newXMLGregorianCalendar(endDate));
+				endDateXMLCal = datatypeFactory.newXMLGregorianCalendar(endDate);
+				dataset.setEndDate(endDateXMLCal);
 			}
 			if(null != startDate) {
 				dataset.setStartDate(datatypeFactory.newXMLGregorianCalendar(startDate));
 			}
 			dataset.setType(dtsType);
-			return create(dataset);
+			long dts_id = create(dataset);
+			if(null != endDateXMLCal) {
+				inv.setEndDate(endDateXMLCal);
+				update(inv);
+			}
+			return dts_id;
 		} catch (IcatException_Exception e) {
 			LOG.error("Unable to create dataset [" + investigation + ", " + visit + ", " + name + ", " + location + "]", e);
 			throw new ICATClientException(e);
@@ -442,6 +450,10 @@ public class ICATClientImpl extends ICATClient {
 		final long id = icat.create(sessionId, entity);
 		entity.setId(id);
 		return id;
+	}
+	
+	private void update(EntityBaseBean entity)  throws IcatException_Exception {
+		icat.update(sessionId, entity);
 	}
 	
 	@SuppressWarnings("unchecked")
