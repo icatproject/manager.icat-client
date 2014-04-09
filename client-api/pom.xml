@@ -33,6 +33,11 @@
 		<groupId>log4j</groupId>
 		<artifactId>apache-log4j-extras</artifactId>
 	</dependency>
+    <!-- testing -->
+	<dependency>
+		<groupId>junit</groupId>
+		<artifactId>junit</artifactId>
+	</dependency>
   </dependencies>
 
   <build>
