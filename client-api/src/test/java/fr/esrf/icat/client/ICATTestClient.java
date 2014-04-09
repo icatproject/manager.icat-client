@@ -35,9 +35,6 @@ public class ICATTestClient extends DelegatedICATClient {
 
 	private final static Logger LOG = LoggerFactory.getLogger(ICATTestClient.class);
 	
-	public final static String ENTITY_DATASET = "Dataset";
-	public final static String ENTITY_INVESTIGATION = "Investigation";
-
 	private List<Long> investigationList;
 
 	private List<Long> datasetList;

@@ -28,6 +28,16 @@ import java.util.GregorianCalendar;
 
 public abstract class ICATClient {
 
+	/**
+	 * Name of dataset entity. Should not change.
+	 */
+	public static final String ENTITY_DATASET = "Dataset";
+
+	/**
+	 * Name of investigation entity. Should not change.
+	 */
+	public static final String ENTITY_INVESTIGATION = "Investigation";
+
 	protected static final String ICAT_SERVICE_NAME = "ICATService";
 
 	protected static final String ICATPROJECT_NAMESPACE = "http://icatproject.org";

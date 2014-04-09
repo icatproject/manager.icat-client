@@ -65,8 +65,6 @@ import fr.esrf.icat.client.ICATClientException;
 
 public class ICATClientImpl extends ICATClient {
 
-	private static final String ENTITY_DATASET = "Dataset";
-
 	private final static Logger LOG = LoggerFactory.getLogger(ICATClient.class);
 	
 	private ICAT icat;
