@@ -49,19 +49,19 @@ public class TestICATClientV4_3_1 {
 	@Test
 	public void testDataset() throws ICATClientException {
 		try {
-			client.createDataset("dummyInvestigation", "ID19", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar()); 
+			client.createDataset("dummyInvestigation", "ID19", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar()); 
 			fail("Should not be able to create a dataset for missing investigation");
 		} catch(ICATClientException e) {
 			// pass
 		}
 
 		long idi = client.createInvestigation("dummyInvestigation", "MA", "dummyVisit", "dummy title", "ID19", new GregorianCalendar());
-		long idd = client.createDataset("dummyInvestigation", "dummyVisit", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar());
+		long idd = client.createDataset("dummyInvestigation", "dummyVisit", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar());
 		
 		assertTrue("Incorrect id", idd > 0);
 
 		try {
-			client.createDataset("dummyInvestigation", "ID19", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar()); 
+			client.createDataset("dummyInvestigation", "ID19", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar()); 
 			fail("Should not be able to create a dataset twice");
 		} catch(ICATClientException e) {
 			// pass
@@ -73,7 +73,7 @@ public class TestICATClientV4_3_1 {
 	@Test
 	public void testDatasetParameter() throws ICATClientException {
 		long idi = client.createInvestigation("dummyInvestigation", "MA", "dummyVisit", "dummy title", "ID19", new GregorianCalendar());
-		long idd = client.createDataset("dummyInvestigation", "dummyVisit", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar());
+		long idd = client.createDataset("dummyInvestigation", "dummyVisit", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar());
 		
 		client.createDatasetParameter(idd, "machineMode", "dummy value");
 		client.createDatasetParameter(idd, "energy", Double.toString(25.0));
@@ -91,7 +91,7 @@ public class TestICATClientV4_3_1 {
 	@Test
 	public void testDatafile() throws ICATClientException {
 		long idi = client.createInvestigation("dummyInvestigation", "MA", "dummyVisit", "dummy title", "ID19", new GregorianCalendar());
-		long idd = client.createDataset("dummyInvestigation", "dummyVisit", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar());
+		long idd = client.createDataset("dummyInvestigation", "dummyVisit", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar());
 		
 		client.createDatafile(idd, "filename", "/file/location", "edf");
 		

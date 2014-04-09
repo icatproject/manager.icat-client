@@ -175,7 +175,7 @@ public abstract class ICATClient {
 	
 	public abstract long createInvestigation(String name, String type, String visit, String title, String instrument, GregorianCalendar startDate) throws ICATClientException;
 
-	public abstract long createDataset(String investigation, String instrument, String name, String location, GregorianCalendar startDate, GregorianCalendar endDate) throws ICATClientException;
+	public abstract long createDataset(String investigation, String instrument, String sampleName, String name, String location, GregorianCalendar startDate, GregorianCalendar endDate) throws ICATClientException;
 
 	public abstract long createDatafile(long datasetID, String filename, String location, String format)  throws ICATClientException;
 	

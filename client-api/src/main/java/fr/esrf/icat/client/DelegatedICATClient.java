@@ -86,8 +86,8 @@ public abstract class DelegatedICATClient extends ICATClient {
 	}
 
 	@Override
-	public long createDataset(final String investigation, final String instrument, final String name, final String location, final GregorianCalendar startDate, final GregorianCalendar endDate) throws ICATClientException {
-		return delegate.createDataset(investigation, instrument, name, location, startDate, endDate);
+	public long createDataset(final String investigation, final String instrument, final String sampleName, final String name, final String location, final GregorianCalendar startDate, final GregorianCalendar endDate) throws ICATClientException {
+		return delegate.createDataset(investigation, instrument, sampleName, name, location, startDate, endDate);
 	}
 
 	@Override

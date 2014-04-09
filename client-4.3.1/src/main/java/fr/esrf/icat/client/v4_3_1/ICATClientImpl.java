@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
@@ -55,6 +56,7 @@ import org.icatproject_4_3_1.Login.Credentials;
 import org.icatproject_4_3_1.Login.Credentials.Entry;
 import org.icatproject_4_3_1.ParameterType;
 import org.icatproject_4_3_1.ParameterValueType;
+import org.icatproject_4_3_1.Sample;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -242,11 +244,21 @@ public class ICATClientImpl extends ICATClient {
 	}
 
 	@Override
-	public long createDataset(final String investigation, final String visit, final String name, final String location, final GregorianCalendar startDate, final GregorianCalendar endDate) throws ICATClientException {
+	public long createDataset(final String investigation, final String visit, final String sampleName, final String name, final String location, final GregorianCalendar startDate, final GregorianCalendar endDate) throws ICATClientException {
 		try {
 			checkConnection();
 			// retrieve the investigation
 			Investigation inv = getInvestigation(investigation, visit);
+			if (null == inv) {
+				String message = "Investigation " + investigation + "[" + visit + "] not found";
+				LOG.error(message);
+				throw new ICATClientException(message);
+			}
+			// retrieve or create the sample
+			Sample sample = null;
+			if(null != sampleName) {
+				sample = getOrCreateSample(inv, sampleName);
+			}
 			// create the dataset
 			Dataset dataset = new Dataset();
 			dataset.setInvestigation(inv);
@@ -261,8 +273,14 @@ public class ICATClientImpl extends ICATClient {
 				dataset.setStartDate(datatypeFactory.newXMLGregorianCalendar(startDate));
 			}
 			dataset.setType(dtsType);
+			// set sample if defined
+			if(null != sample) {
+				dataset.setSample(sample);
+			}
 			long dts_id = create(dataset);
-			if(null != endDateXMLCal) {
+			// update investigation end date if needed
+			XMLGregorianCalendar invEndDate = inv.getEndDate();
+			if(null != endDateXMLCal && (null == invEndDate || invEndDate.compare(endDateXMLCal) == DatatypeConstants.LESSER)) {
 				inv.setEndDate(endDateXMLCal);
 				update(inv);
 			}
@@ -271,6 +289,21 @@ public class ICATClientImpl extends ICATClient {
 			LOG.error("Unable to create dataset [" + investigation + ", " + visit + ", " + name + ", " + location + "]", e);
 			throw new ICATClientException(e);
 		}
+	}
+
+	private Sample getOrCreateSample(Investigation inv, String sampleName) throws ICATClientException, IcatException_Exception {
+		checkConnection();
+		// try to get it from db
+		List<Object> sampleList = icat.search(sessionId, "Sample [investigation.id ='" + inv.getId() + "' AND name = '" + sampleName +"']");
+		if(null != sampleList && sampleList.size() > 0) {
+			return (Sample) sampleList.get(0);
+		}
+		// if not yet defined, create it
+		Sample sample = new Sample();
+		sample.setName(sampleName);
+		sample.setInvestigation(inv);
+		create(sample);
+		return sample;
 	}
 
 	private void createInvestigationInstrumentIfAbsent(final Instrument inst, final Investigation inv) throws IcatException_Exception, ICATClientException {

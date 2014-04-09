@@ -68,8 +68,8 @@ public class ICATTestClient extends DelegatedICATClient {
 	}
 
 	@Override
-	public long createDataset(final String investigation, final String instrument, final String name, final String location, final GregorianCalendar startDate, final GregorianCalendar endDate) throws ICATClientException {
-		long id = super.createDataset(investigation, instrument, name, location, startDate, endDate);
+	public long createDataset(final String investigation, final String instrument, final String sampleName, final String name, final String location, final GregorianCalendar startDate, final GregorianCalendar endDate) throws ICATClientException {
+		long id = super.createDataset(investigation, instrument, sampleName, name, location, startDate, endDate);
 		datasetList.add(id);
 		return id;
 	}
