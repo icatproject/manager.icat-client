@@ -351,6 +351,7 @@ public class ICATClientImpl extends ICATClient {
 			ParameterType type = getParameterType(parameter);
 			// check it is not null
 			if(null == type) {
+				LOG.error("Parameter type '" + parameter + "' not defined");
 				throw new ICATClientException("Parameter type does not exist: " + type);
 			}
 			DatasetParameter dtsparam = new DatasetParameter();
@@ -380,9 +381,11 @@ public class ICATClientImpl extends ICATClient {
 			List<EntityBaseBean> dtspCollection = new LinkedList<EntityBaseBean>();
 			for(DatasetParameterDTO dtspd : datasetParamCollection) {
 				// retrieve the parameter type
-				ParameterType type = getParameterType(dtspd.getParameter());
+				String parameter = dtspd.getParameter();
+				ParameterType type = getParameterType(parameter);
 				// check it is not null
 				if(null == type) {
+					LOG.error("Parameter type '" + parameter + "' not defined");
 					throw new ICATClientException("Parameter type does not exist: " + type);
 				}
 				DatasetParameter dtsparam = new DatasetParameter();
