@@ -277,6 +277,7 @@ public class ICATClientImpl extends ICATClient {
 			if(null != sample) {
 				dataset.setSample(sample);
 			}
+			dataset.setComplete(true);
 			long dts_id = create(dataset);
 			// update investigation end date if needed
 			XMLGregorianCalendar invEndDate = inv.getEndDate();
