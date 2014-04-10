@@ -26,6 +26,7 @@ package fr.esrf.icat.client.v4_3_1;
 import static org.junit.Assert.*;
 
 import java.util.GregorianCalendar;
+import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Before;
@@ -41,10 +42,12 @@ public class TestICATClientV4_3_1 {
 	@Before
 	public void setUp() throws Exception {
 		client = new ICATClientImpl();
-		client.setIcatAuthnPlugin("db");
-		client.setIcatBaseUrl("https://ovm-icat-sandbox.esrf.fr:8181");
-		client.setIcatUsername("root");
-		client.setIcatPassword("password");
+		Properties prop = new Properties();
+		prop.load(ClassLoader.getSystemResourceAsStream("icat.properties"));
+		client.setIcatBaseUrl(prop.getProperty("icat.service.url"));
+		client.setIcatAuthnPlugin(prop.getProperty("icat.security.plugin"));
+		client.setIcatUsername(prop.getProperty("icat.security.username"));
+		client.setIcatPassword(prop.getProperty("icat.security.password"));
 		client.init();
 	}
 
