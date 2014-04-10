@@ -26,7 +26,7 @@ package fr.esrf.icat.client;
 import java.util.GregorianCalendar;
 
 
-public abstract class DelegatedICATClient extends ICATClient {
+public class DelegatedICATClient extends ICATClient {
 
 	private ICATClient delegate;
 
@@ -83,6 +83,11 @@ public abstract class DelegatedICATClient extends ICATClient {
 	@Override
 	public long createInvestigation(final String name, final String type, final String visit, final String title, final String instrument, final GregorianCalendar startDate) throws ICATClientException {
 		return delegate.createInvestigation(name, type, visit, title, instrument, startDate);
+	}
+
+	@Override
+	public void updateInvestigationDescription(String name, String visit, String description) throws ICATClientException {
+		delegate.updateInvestigationDescription(name, visit, description);
 	}
 
 	@Override

@@ -244,6 +244,25 @@ public class ICATClientImpl extends ICATClient {
 	}
 
 	@Override
+	public void updateInvestigationDescription(String name, String visit, String description) throws ICATClientException {
+		try {
+			checkConnection();
+			// retrieve the investigation
+			Investigation inv = getInvestigation(name, visit);
+			if (null == inv) {
+				String message = "Investigation " + name + "[" + visit + "] not found";
+				LOG.error(message);
+				throw new ICATClientException(message);
+			}
+			inv.setSummary(description);
+			update(inv);
+		} catch (IcatException_Exception e) {
+			LOG.error("Unable to update investigation [" + name + ", " + visit + "]", e);
+			throw new ICATClientException(e);
+		}
+	}
+
+	@Override
 	public long createDataset(final String investigation, final String visit, final String sampleName, final String name, final String location, final GregorianCalendar startDate, final GregorianCalendar endDate) throws ICATClientException {
 		try {
 			checkConnection();
@@ -537,4 +556,5 @@ public class ICATClientImpl extends ICATClient {
 			throw new ICATClientException(e);
 		}
 	}
+
 }
