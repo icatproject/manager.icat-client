@@ -25,6 +25,7 @@ package fr.esrf.icat.client.v4_3_1;
 
 import static org.junit.Assert.*;
 
+import java.io.InputStream;
 import java.util.GregorianCalendar;
 import java.util.Properties;
 
@@ -43,7 +44,13 @@ public class TestICATClientV4_3_1 {
 	public void setUp() throws Exception {
 		client = new ICATClientImpl();
 		Properties prop = new Properties();
-		prop.load(ClassLoader.getSystemResourceAsStream("icat.properties"));
+		InputStream is = ClassLoader.getSystemResourceAsStream("icat.properties");
+		prop.load(is);
+		try {
+			is.close();
+		} catch (Exception e) {
+			// do nothing
+		}
 		client.setIcatBaseUrl(prop.getProperty("icat.service.url"));
 		client.setIcatAuthnPlugin(prop.getProperty("icat.security.plugin"));
 		client.setIcatUsername(prop.getProperty("icat.security.username"));
