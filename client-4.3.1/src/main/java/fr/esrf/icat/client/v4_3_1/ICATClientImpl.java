@@ -52,11 +52,13 @@ import org.icatproject_4_3_1.Instrument;
 import org.icatproject_4_3_1.Investigation;
 import org.icatproject_4_3_1.InvestigationInstrument;
 import org.icatproject_4_3_1.InvestigationType;
+import org.icatproject_4_3_1.InvestigationUser;
 import org.icatproject_4_3_1.Login.Credentials;
 import org.icatproject_4_3_1.Login.Credentials.Entry;
 import org.icatproject_4_3_1.ParameterType;
 import org.icatproject_4_3_1.ParameterValueType;
 import org.icatproject_4_3_1.Sample;
+import org.icatproject_4_3_1.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +66,7 @@ import fr.esrf.icat.client.DatafileDTO;
 import fr.esrf.icat.client.DatasetParameterDTO;
 import fr.esrf.icat.client.ICATClient;
 import fr.esrf.icat.client.ICATClientException;
+import fr.esrf.icat.client.UserDTO;
 
 public class ICATClientImpl extends ICATClient {
 
@@ -244,7 +247,7 @@ public class ICATClientImpl extends ICATClient {
 	}
 
 	@Override
-	public void updateInvestigationDescription(String name, String visit, String description) throws ICATClientException {
+	public void updateInvestigationDescription(final String name, final String visit, final String description) throws ICATClientException {
 		try {
 			checkConnection();
 			// retrieve the investigation
@@ -263,7 +266,52 @@ public class ICATClientImpl extends ICATClient {
 	}
 
 	@Override
-	public long createDataset(final String investigation, final String visit, final String sampleName, final String name, final String location, final GregorianCalendar startDate, final GregorianCalendar endDate) throws ICATClientException {
+	public List<Long> addInvestigationUsers(final String name, final String visit, final Collection<UserDTO> users) throws ICATClientException {
+		try {
+			checkConnection();
+			// retrieve the investigation
+			Investigation inv = getInvestigation(name, visit);
+			if (null == inv) {
+				String message = "Investigation " + name + "[" + visit + "] not found";
+				LOG.error(message);
+				throw new ICATClientException(message);
+			}
+			// make sure each user exist
+			// users need to be created one by one so that the create method sets their id
+			// if created with createMany they need to be fetched again to get the correct ids 
+			List<User> icatUsers = new LinkedList<User>();
+			List<Long> newUserIds = new LinkedList<Long>();
+			Map<User,String> userRoles = new HashMap<User,String>();
+			for(UserDTO u : users) {
+				User icatuser = getUser(u.getName());
+				if(null == icatuser) {
+					icatuser = new User();
+					icatuser.setName(u.getName());
+					icatuser.setFullName(u.getFullName());
+					newUserIds.add(create(icatuser));
+				}
+				icatUsers.add(icatuser);
+				userRoles.put(icatuser, u.getRole());
+			}
+			// bulk create investigation users
+			List<EntityBaseBean> ivUsers = new LinkedList<EntityBaseBean>();
+			for(User u : icatUsers) {
+				InvestigationUser ivu = new InvestigationUser();
+				ivu.setInvestigation(inv);
+				ivu.setUser(u);
+				ivu.setRole(userRoles.get(u));
+				ivUsers.add(ivu);
+			}
+			icat.createMany(sessionId, ivUsers);
+			return newUserIds;
+		} catch (IcatException_Exception e) {
+			LOG.error("Unable to add user to investigation [" + name + ", " + visit + "]", e);
+			throw new ICATClientException(e);
+		}
+	}
+	
+	@Override
+	public long createDataset(final String investigation, final String visit, final String sampleName, final String name, final String location, final GregorianCalendar startDate, final GregorianCalendar endDate, final String comment) throws ICATClientException {
 		try {
 			checkConnection();
 			// retrieve the investigation
@@ -283,6 +331,12 @@ public class ICATClientImpl extends ICATClient {
 			dataset.setInvestigation(inv);
 			dataset.setName(name);
 			dataset.setLocation(location);
+			dataset.setType(dtsType);
+			// set comment if defined
+			if(null != comment) {
+				dataset.setDescription(comment);
+			}
+			// set dates if defined
 			XMLGregorianCalendar endDateXMLCal = null;
 			if(null != endDate) {
 				endDateXMLCal = datatypeFactory.newXMLGregorianCalendar(endDate);
@@ -291,11 +345,11 @@ public class ICATClientImpl extends ICATClient {
 			if(null != startDate) {
 				dataset.setStartDate(datatypeFactory.newXMLGregorianCalendar(startDate));
 			}
-			dataset.setType(dtsType);
 			// set sample if defined
 			if(null != sample) {
 				dataset.setSample(sample);
 			}
+			// set complete and create
 			dataset.setComplete(true);
 			long dts_id = create(dataset);
 			// update investigation end date if needed
@@ -311,7 +365,7 @@ public class ICATClientImpl extends ICATClient {
 		}
 	}
 
-	private Sample getOrCreateSample(Investigation inv, String sampleName) throws ICATClientException, IcatException_Exception {
+	private Sample getOrCreateSample(final Investigation inv, final String sampleName) throws ICATClientException, IcatException_Exception {
 		checkConnection();
 		// try to get it from db
 		List<Object> sampleList = icat.search(sessionId, "Sample [investigation.id ='" + inv.getId() + "' AND name = '" + sampleName +"']");
@@ -368,7 +422,7 @@ public class ICATClientImpl extends ICATClient {
 	}
 	
 	@Override
-	public void createDatafiles(long datasetID, Collection<DatafileDTO> datafileCollection) throws ICATClientException {
+	public void createDatafiles(final long datasetID, final Collection<DatafileDTO> datafileCollection) throws ICATClientException {
 		try {
 			checkConnection();
 			// retrieve the dataset
@@ -425,7 +479,7 @@ public class ICATClientImpl extends ICATClient {
 	}
 
 	@Override
-	public void createDatasetParameters(long datasetID, Collection<DatasetParameterDTO> datasetParamCollection) throws ICATClientException {
+	public void createDatasetParameters(final long datasetID, final Collection<DatasetParameterDTO> datasetParamCollection) throws ICATClientException {
 		try {
 			checkConnection();
 			// retrieve the dataset
@@ -523,13 +577,19 @@ public class ICATClientImpl extends ICATClient {
 		return paramt;
 	}
 
-	private long create(EntityBaseBean entity)  throws IcatException_Exception {
+	private User getUser(final String name) throws IcatException_Exception, ICATClientException {
+		checkConnection();
+		List<Object> response = icat.search(sessionId, "User [name='" + name + "']");
+		return (User) ((null == response || response.size() == 0) ? null : response.get(0));
+	}
+	
+	private long create(final EntityBaseBean entity)  throws IcatException_Exception {
 		final long id = icat.create(sessionId, entity);
 		entity.setId(id);
 		return id;
 	}
 	
-	private void update(EntityBaseBean entity)  throws IcatException_Exception {
+	private void update(final EntityBaseBean entity)  throws IcatException_Exception {
 		icat.update(sessionId, entity);
 	}
 	

@@ -25,6 +25,7 @@ package fr.esrf.icat.client;
 
 import java.util.Collection;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 public abstract class ICATClient {
 
@@ -37,6 +38,11 @@ public abstract class ICATClient {
 	 * Name of investigation entity. Should not change.
 	 */
 	public static final String ENTITY_INVESTIGATION = "Investigation";
+
+	/**
+	 * Name of user entity. Should not change.
+	 */
+	public static final String ENTITY_USER = "User";
 
 	protected static final String ICAT_SERVICE_NAME = "ICATService";
 
@@ -176,12 +182,22 @@ public abstract class ICATClient {
 	public abstract long createInvestigation(String name, String type, String visit, String title, String instrument, GregorianCalendar startDate) throws ICATClientException;
 
 	public abstract void updateInvestigationDescription(String name, String visit, String description) throws ICATClientException;
+	
+	/**
+	 * Add the given users to the investigation defined by name and visit.
+	 * @param name the name of the investigation.
+	 * @param visit the visitID of the investigation.
+	 * @param users the list of users to add to that investigation.
+	 * @return the list of ids of users created in the process. Already existing user ids are not returned. 
+	 * @throws ICATClientException in case something goes wrong.
+	 */
+	public abstract List<Long> addInvestigationUsers(String name, String visit, Collection<UserDTO> users) throws ICATClientException;
 
-	public abstract long createDataset(String investigation, String instrument, String sampleName, String name, String location, GregorianCalendar startDate, GregorianCalendar endDate) throws ICATClientException;
+	public abstract long createDataset(String investigation, String instrument, String sampleName, String name, String location, GregorianCalendar startDate, GregorianCalendar endDate, String comment) throws ICATClientException;
 
 	public abstract long createDatafile(long datasetID, String filename, String location, String format)  throws ICATClientException;
 	
-	public long createDatafile(long datasetID, DatafileDTO datafileData) throws ICATClientException {
+	public long createDatafile(final long datasetID, final DatafileDTO datafileData) throws ICATClientException {
 		return createDatafile(datasetID, datafileData.getFilename(), datafileData.getLocation(), datafileData.getFormat());
 	}
 	
@@ -191,7 +207,7 @@ public abstract class ICATClient {
 	 * @param datafileCollection
 	 * @throws ICATClientException
 	 */
-	public void createDatafiles(long datasetID, Collection<DatafileDTO> datafileCollection) throws ICATClientException {
+	public void createDatafiles(final long datasetID, final Collection<DatafileDTO> datafileCollection) throws ICATClientException {
 		for(DatafileDTO dtfd : datafileCollection) {
 			createDatafile(datasetID, dtfd);
 		}
@@ -199,7 +215,7 @@ public abstract class ICATClient {
 
 	public abstract long createDatasetParameter(long datasetID, String parameter, String value) throws ICATClientException;
 	
-	public long createDatasetParameter(long datasetID, DatasetParameterDTO datasetParamData) throws ICATClientException {
+	public long createDatasetParameter(final long datasetID, final DatasetParameterDTO datasetParamData) throws ICATClientException {
 		return createDatasetParameter(datasetID, datasetParamData.getParameter(), datasetParamData.getValue());
 	}
 	
@@ -209,7 +225,7 @@ public abstract class ICATClient {
 	 * @param datasetParamCollection
 	 * @throws ICATClientException
 	 */
-	public void createDatasetParameters(long datasetID, Collection<DatasetParameterDTO> datasetParamCollection)  throws ICATClientException {
+	public void createDatasetParameters(final long datasetID, final Collection<DatasetParameterDTO> datasetParamCollection)  throws ICATClientException {
 		for(DatasetParameterDTO dtspd : datasetParamCollection) {
 			createDatasetParameter(datasetID, dtspd);
 		}

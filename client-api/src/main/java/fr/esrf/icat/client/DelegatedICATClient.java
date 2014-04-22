@@ -23,7 +23,9 @@ package fr.esrf.icat.client;
  */
 
 
+import java.util.Collection;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 
 public class DelegatedICATClient extends ICATClient {
@@ -38,7 +40,7 @@ public class DelegatedICATClient extends ICATClient {
 		return delegate;
 	}
 
-	public void setDelegate(ICATClient delegate) {
+	public void setDelegate(final ICATClient delegate) {
 		this.delegate = delegate;
 	}
 
@@ -86,13 +88,13 @@ public class DelegatedICATClient extends ICATClient {
 	}
 
 	@Override
-	public void updateInvestigationDescription(String name, String visit, String description) throws ICATClientException {
+	public void updateInvestigationDescription(final String name, final String visit, final String description) throws ICATClientException {
 		delegate.updateInvestigationDescription(name, visit, description);
 	}
 
 	@Override
-	public long createDataset(final String investigation, final String instrument, final String sampleName, final String name, final String location, final GregorianCalendar startDate, final GregorianCalendar endDate) throws ICATClientException {
-		return delegate.createDataset(investigation, instrument, sampleName, name, location, startDate, endDate);
+	public long createDataset(final String investigation, final String instrument, final String sampleName, final String name, final String location, final GregorianCalendar startDate, final GregorianCalendar endDate, final String comment) throws ICATClientException {
+		return delegate.createDataset(investigation, instrument, sampleName, name, location, startDate, endDate, comment);
 	}
 
 	@Override
@@ -108,6 +110,12 @@ public class DelegatedICATClient extends ICATClient {
 	@Override
 	public void deleteEntities(final String entityName, final Long... ids) throws ICATClientException {
 		delegate.deleteEntities(entityName, ids);
+	}
+
+	@Override
+	public List<Long> addInvestigationUsers(final String name, final String visit, final Collection<UserDTO> users) throws ICATClientException {
+		return delegate.addInvestigationUsers(name, visit, users);
+		
 	}
 
 }

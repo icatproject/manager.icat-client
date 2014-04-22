@@ -27,6 +27,8 @@ import static org.junit.Assert.*;
 
 import java.io.InputStream;
 import java.util.GregorianCalendar;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 import org.junit.After;
@@ -35,6 +37,8 @@ import org.junit.Test;
 
 import fr.esrf.icat.client.ICATClient;
 import fr.esrf.icat.client.ICATClientException;
+import fr.esrf.icat.client.UserDTO;
+import fr.esrf.icat.client.data.UserDTOImpl;
 
 public class TestICATClientV4_3_1 {
 
@@ -80,21 +84,37 @@ public class TestICATClientV4_3_1 {
 	}
 	
 	@Test
+	public void testInvestigationUsers() throws ICATClientException {
+		long id = client.createInvestigation("dummyInvestigation", "MA", "dummyVisit", "dummy title", "ID19", new GregorianCalendar());
+		
+		List<UserDTO> users = new LinkedList<UserDTO>();
+		users.add(new UserDTOImpl("user1", "User 1", "Scientist"));
+		users.add(new UserDTOImpl("user2", "User 2", "Investigator"));
+		
+		List<Long> idu = client.addInvestigationUsers("dummyInvestigation", "dummyVisit", users);
+		
+		assertTrue("Users not created correctly", idu != null && idu.size() == 2);
+		
+		client.deleteEntities(ICATClient.ENTITY_INVESTIGATION, id);
+		client.deleteEntities(ICATClient.ENTITY_USER, idu.toArray(new Long[idu.size()]));
+	}
+	
+	@Test
 	public void testDataset() throws ICATClientException {
 		try {
-			client.createDataset("dummyInvestigation", "ID19", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar()); 
+			client.createDataset("dummyInvestigation", "ID19", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar(), null); 
 			fail("Should not be able to create a dataset for missing investigation");
 		} catch(ICATClientException e) {
 			// pass
 		}
 
 		long idi = client.createInvestigation("dummyInvestigation", "MA", "dummyVisit", "dummy title", "ID19", new GregorianCalendar());
-		long idd = client.createDataset("dummyInvestigation", "dummyVisit", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar());
+		long idd = client.createDataset("dummyInvestigation", "dummyVisit", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar(), null);
 		
 		assertTrue("Incorrect id", idd > 0);
 
 		try {
-			client.createDataset("dummyInvestigation", "ID19", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar()); 
+			client.createDataset("dummyInvestigation", "ID19", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar(), null); 
 			fail("Should not be able to create a dataset twice");
 		} catch(ICATClientException e) {
 			// pass
@@ -106,7 +126,7 @@ public class TestICATClientV4_3_1 {
 	@Test
 	public void testDatasetParameter() throws ICATClientException {
 		long idi = client.createInvestigation("dummyInvestigation", "MA", "dummyVisit", "dummy title", "ID19", new GregorianCalendar());
-		long idd = client.createDataset("dummyInvestigation", "dummyVisit", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar());
+		long idd = client.createDataset("dummyInvestigation", "dummyVisit", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar(), null);
 		
 		client.createDatasetParameter(idd, "machineMode", "dummy value");
 		client.createDatasetParameter(idd, "energy", Double.toString(25.0));
@@ -124,7 +144,7 @@ public class TestICATClientV4_3_1 {
 	@Test
 	public void testDatafile() throws ICATClientException {
 		long idi = client.createInvestigation("dummyInvestigation", "MA", "dummyVisit", "dummy title", "ID19", new GregorianCalendar());
-		long idd = client.createDataset("dummyInvestigation", "dummyVisit", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar());
+		long idd = client.createDataset("dummyInvestigation", "dummyVisit", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar(), null);
 		
 		client.createDatafile(idd, "filename", "/file/location", "edf");
 		
