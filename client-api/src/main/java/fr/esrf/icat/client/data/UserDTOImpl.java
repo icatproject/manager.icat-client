@@ -64,5 +64,23 @@ public class UserDTOImpl implements UserDTO {
 	public void setFullName(String fullName) {
 		this.fullName = fullName;
 	}
+
+	@Override
+	public int hashCode() {
+		return name.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (this == obj) return true;
+		if (!(obj instanceof UserDTO)) return false;
+		UserDTO other = (UserDTO) obj;
+		if (name == null) {
+			return null == other.getName();
+		} else {
+			return name.equals(other.getName());
+		}
+	}
 	
 }
