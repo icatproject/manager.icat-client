@@ -30,5 +30,7 @@ public interface DatafileDTO {
 	public String getLocation();
 
 	public String getFormat();
+	
+	public long getSize();
 
 }

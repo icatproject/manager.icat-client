@@ -195,10 +195,10 @@ public abstract class ICATClient {
 
 	public abstract long createDataset(String investigation, String instrument, String sampleName, String name, String location, GregorianCalendar startDate, GregorianCalendar endDate, String comment) throws ICATClientException;
 
-	public abstract long createDatafile(long datasetID, String filename, String location, String format)  throws ICATClientException;
+	public abstract long createDatafile(long datasetID, String filename, String location, String format, long size)  throws ICATClientException;
 	
 	public long createDatafile(final long datasetID, final DatafileDTO datafileData) throws ICATClientException {
-		return createDatafile(datasetID, datafileData.getFilename(), datafileData.getLocation(), datafileData.getFormat());
+		return createDatafile(datasetID, datafileData.getFilename(), datafileData.getLocation(), datafileData.getFormat(), datafileData.getSize());
 	}
 	
 	/**

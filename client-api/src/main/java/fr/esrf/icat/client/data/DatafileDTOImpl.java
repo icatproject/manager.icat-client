@@ -30,12 +30,18 @@ public class DatafileDTOImpl implements DatafileDTO {
 	private String filename;
 	private String location;
 	private String format;
+	private long size;
 	
-	public DatafileDTOImpl(String filename, String location, String format) {
+	public DatafileDTOImpl() {
+		super();
+	}
+
+	public DatafileDTOImpl(final String filename, final String location, final String format, final long size) {
 		super();
 		this.filename = filename;
 		this.location = location;
 		this.format = format;
+		this.size = size;
 	}
 	
 	/* (non-Javadoc)
@@ -70,6 +76,15 @@ public class DatafileDTOImpl implements DatafileDTO {
 
 	public void setFormat(String format) {
 		this.format = format;
+	}
+
+	@Override
+	public long getSize() {
+		return size;
+	}
+
+	public void setSize(long size) {
+		this.size = size;
 	}
 	
 	

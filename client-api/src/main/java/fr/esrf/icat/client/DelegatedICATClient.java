@@ -98,8 +98,8 @@ public class DelegatedICATClient extends ICATClient {
 	}
 
 	@Override
-	public long createDatafile(final long datasetID, final String filename, final String location, final String format) throws ICATClientException {
-		return delegate.createDatafile(datasetID, filename, location, format);
+	public long createDatafile(final long datasetID, final String filename, final String location, final String format, final long size) throws ICATClientException {
+		return delegate.createDatafile(datasetID, filename, location, format, size);
 	}
 
 	@Override

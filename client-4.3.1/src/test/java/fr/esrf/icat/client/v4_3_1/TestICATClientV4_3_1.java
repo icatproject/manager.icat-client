@@ -146,7 +146,7 @@ public class TestICATClientV4_3_1 {
 		long idi = client.createInvestigation("dummyInvestigation", "MA", "dummyVisit", "dummy title", "ID19", new GregorianCalendar());
 		long idd = client.createDataset("dummyInvestigation", "dummyVisit", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar(), null);
 		
-		client.createDatafile(idd, "filename", "/file/location", "edf");
+		client.createDatafile(idd, "filename", "/file/location", "edf", 0L);
 		
 		client.deleteEntities(ICATClient.ENTITY_INVESTIGATION, idi); // cascade to dataset
 	}

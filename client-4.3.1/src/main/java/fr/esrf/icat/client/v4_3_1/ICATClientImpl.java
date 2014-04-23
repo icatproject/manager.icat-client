@@ -401,7 +401,7 @@ public class ICATClientImpl extends ICATClient {
 	}
 
 	@Override
-	public long createDatafile(final long datasetID, final String filename, final String location, final String format) throws ICATClientException {
+	public long createDatafile(final long datasetID, final String filename, final String location, final String format, final long size) throws ICATClientException {
 		try {
 			checkConnection();
 			// retrieve the dataset
@@ -414,6 +414,7 @@ public class ICATClientImpl extends ICATClient {
 			dtf.setName(filename);
 			dtf.setLocation(location);
 			dtf.setDatafileFormat(fmt);
+			dtf.setFileSize(size);
 			return create(dtf);
 		} catch (IcatException_Exception e) {
 			LOG.error("Unable to create datafile [" + datasetID + ", " + filename + ", " + location+ ", " + format + "]", e);
@@ -438,6 +439,7 @@ public class ICATClientImpl extends ICATClient {
 				dtf.setName(dtfd.getFilename());
 				dtf.setLocation(dtfd.getLocation());
 				dtf.setDatafileFormat(fmt);
+				dtf.setFileSize(dtfd.getSize());
 				dtfCollection.add(dtf);
 			}
 			

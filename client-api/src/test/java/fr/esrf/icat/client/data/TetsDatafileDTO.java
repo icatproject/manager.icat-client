@@ -33,11 +33,12 @@ public class TetsDatafileDTO {
 
 	@Test
 	public void test() {
-		DatafileDTO dtfdto = new DatafileDTOImpl("filename", "/file/location/", "EDF");
+		DatafileDTO dtfdto = new DatafileDTOImpl("filename", "/file/location/", "EDF", 1024L);
 		
 		assertTrue("Wrong filename", "filename".equals(dtfdto.getFilename()));
 		assertTrue("Wrong location", "/file/location/".equals(dtfdto.getLocation()));
 		assertTrue("Wrong format", "EDF".equals(dtfdto.getFormat()));
+		assertTrue("Wrong size", 1024L == dtfdto.getSize());
 	}
 
 }
