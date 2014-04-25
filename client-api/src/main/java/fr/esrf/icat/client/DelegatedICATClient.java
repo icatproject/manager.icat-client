@@ -118,4 +118,24 @@ public class DelegatedICATClient extends ICATClient {
 		
 	}
 
+	@Override
+	public long createDatafile(long datasetID, DatafileDTO datafileData) throws ICATClientException {
+		return delegate.createDatafile(datasetID, datafileData);
+	}
+
+	@Override
+	public void createDatafiles(long datasetID, Collection<DatafileDTO> datafileCollection) throws ICATClientException {
+		delegate.createDatafiles(datasetID, datafileCollection);
+	}
+
+	@Override
+	public long createDatasetParameter(long datasetID, DatasetParameterDTO datasetParamData) throws ICATClientException {
+		return delegate.createDatasetParameter(datasetID, datasetParamData);
+	}
+
+	@Override
+	public void createDatasetParameters(long datasetID, Collection<DatasetParameterDTO> datasetParamCollection) throws ICATClientException {
+		delegate.createDatasetParameters(datasetID, datasetParamCollection);
+	}
+
 }
