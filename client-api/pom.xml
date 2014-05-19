@@ -38,6 +38,10 @@
 		<groupId>junit</groupId>
 		<artifactId>junit</artifactId>
 	</dependency>
+	<dependency>
+	  <groupId>de.rosstauscher.proxy_vole</groupId>
+	  <artifactId>proxy_vole</artifactId>
+	</dependency>	
   </dependencies>
 
   <build>
