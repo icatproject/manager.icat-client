@@ -5,7 +5,7 @@
   <parent>
     <groupId>fr.esrf.icat</groupId>
     <artifactId>icat-client-parent</artifactId>
-    <version>0.1</version>
+    <version>0.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>icat-client-4.3.1</artifactId>
