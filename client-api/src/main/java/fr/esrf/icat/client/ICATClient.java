@@ -184,14 +184,14 @@ public abstract class ICATClient {
 	public abstract void updateInvestigationDescription(String name, String visit, String description) throws ICATClientException;
 	
 	/**
-	 * Add the given users to the investigation defined by name and visit.
+	 * Updates list of users for the investigation defined by name and visit.
 	 * @param name the name of the investigation.
 	 * @param visit the visitID of the investigation.
-	 * @param users the list of users to add to that investigation.
+	 * @param users the list of users attached to that investigation.
 	 * @return the list of ids of users created in the process. Already existing user ids are not returned. 
 	 * @throws ICATClientException in case something goes wrong.
 	 */
-	public abstract List<Long> addInvestigationUsers(String name, String visit, Collection<UserDTO> users) throws ICATClientException;
+	public abstract List<Long> updateInvestigationUsers(String name, String visit, Collection<UserDTO> users) throws ICATClientException;
 
 	public abstract long createDataset(String investigation, String instrument, String sampleName, String name, String location, GregorianCalendar startDate, GregorianCalendar endDate, String comment) throws ICATClientException;
 

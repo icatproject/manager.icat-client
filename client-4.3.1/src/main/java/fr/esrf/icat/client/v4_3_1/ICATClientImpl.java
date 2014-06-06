@@ -266,7 +266,7 @@ public class ICATClientImpl extends ICATClient {
 	}
 
 	@Override
-	public List<Long> addInvestigationUsers(final String name, final String visit, final Collection<UserDTO> users) throws ICATClientException {
+	public List<Long> updateInvestigationUsers(final String name, final String visit, final Collection<UserDTO> users) throws ICATClientException {
 		try {
 			checkConnection();
 			// retrieve the investigation
@@ -293,6 +293,9 @@ public class ICATClientImpl extends ICATClient {
 				icatUsers.add(icatuser);
 				userRoles.put(icatuser, u.getRole());
 			}
+			// ADDED: drop existing investigation users
+			// this allows to avoid creation errors AND this makes sure the list is up to date
+			clearInvestigationUsers(inv);
 			// bulk create investigation users
 			List<EntityBaseBean> ivUsers = new LinkedList<EntityBaseBean>();
 			for(User u : icatUsers) {
@@ -309,7 +312,7 @@ public class ICATClientImpl extends ICATClient {
 			throw new ICATClientException(e);
 		}
 	}
-	
+
 	@Override
 	public long createDataset(final String investigation, final String visit, final String sampleName, final String name, final String location, final GregorianCalendar startDate, final GregorianCalendar endDate, final String comment) throws ICATClientException {
 		try {
@@ -619,4 +622,17 @@ public class ICATClientImpl extends ICATClient {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	private void clearInvestigationUsers(final Investigation inv) throws IcatException_Exception {
+		List<? extends Object> invUsers = icat.search(sessionId, "InvestigationUser [investigation.id=" + inv.getId() + "]");
+		if (null != invUsers && !invUsers.isEmpty()) {
+			if(LOG.isDebugEnabled()) {
+				LOG.debug("Removing " + invUsers.size() + " existing investigation users from investigation " + inv.getName() + "[" + inv.getVisitId() +"]");
+			}
+			icat.deleteMany(sessionId, (List<EntityBaseBean>) invUsers);
+		} else if(LOG.isDebugEnabled()) {
+			LOG.debug("No investigation users found for " + inv.getName() + "[" + inv.getVisitId() +"]");
+		}
+	}
+	
 }

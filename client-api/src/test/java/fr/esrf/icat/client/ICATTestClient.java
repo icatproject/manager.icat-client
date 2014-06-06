@@ -81,8 +81,8 @@ public class ICATTestClient extends DelegatedICATClient {
 	}
 	
 	@Override
-	public List<Long> addInvestigationUsers(String name, String visit, Collection<UserDTO> users) throws ICATClientException {
-		List<Long> ids = super.addInvestigationUsers(name, visit, users);
+	public List<Long> updateInvestigationUsers(String name, String visit, Collection<UserDTO> users) throws ICATClientException {
+		List<Long> ids = super.updateInvestigationUsers(name, visit, users);
 		userList.addAll(ids);
 		return ids;
 	}

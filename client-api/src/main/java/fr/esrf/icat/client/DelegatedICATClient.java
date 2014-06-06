@@ -113,8 +113,8 @@ public class DelegatedICATClient extends ICATClient {
 	}
 
 	@Override
-	public List<Long> addInvestigationUsers(final String name, final String visit, final Collection<UserDTO> users) throws ICATClientException {
-		return delegate.addInvestigationUsers(name, visit, users);
+	public List<Long> updateInvestigationUsers(final String name, final String visit, final Collection<UserDTO> users) throws ICATClientException {
+		return delegate.updateInvestigationUsers(name, visit, users);
 		
 	}
 

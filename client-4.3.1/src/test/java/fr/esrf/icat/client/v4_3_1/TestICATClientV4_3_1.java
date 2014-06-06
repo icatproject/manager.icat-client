@@ -91,7 +91,7 @@ public class TestICATClientV4_3_1 {
 		users.add(new UserDTOImpl("user1", "User 1", "Scientist"));
 		users.add(new UserDTOImpl("user2", "User 2", "Investigator"));
 		
-		List<Long> idu = client.addInvestigationUsers("dummyInvestigation", "dummyVisit", users);
+		List<Long> idu = client.updateInvestigationUsers("dummyInvestigation", "dummyVisit", users);
 		
 		assertTrue("Users not created correctly", idu != null && idu.size() == 2);
 		
