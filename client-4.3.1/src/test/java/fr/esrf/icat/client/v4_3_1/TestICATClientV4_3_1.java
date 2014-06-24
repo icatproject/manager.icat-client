@@ -31,18 +31,22 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import org.icatproject_4_3_1.Dataset;
+import org.icatproject_4_3_1.IcatException_Exception;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import fr.esrf.icat.client.DatafileDTO;
 import fr.esrf.icat.client.ICATClient;
 import fr.esrf.icat.client.ICATClientException;
 import fr.esrf.icat.client.UserDTO;
+import fr.esrf.icat.client.data.DatafileDTOImpl;
 import fr.esrf.icat.client.data.UserDTOImpl;
 
 public class TestICATClientV4_3_1 {
 
-	private ICATClient client;
+	private ICATClientImpl client;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -148,7 +152,40 @@ public class TestICATClientV4_3_1 {
 		
 		client.createDatafile(idd, "filename", "/file/location", "edf", 0L);
 		
-		client.deleteEntities(ICATClient.ENTITY_INVESTIGATION, idi); // cascade to dataset
+		try {
+			Dataset resultInv = (Dataset) client.get("Dataset INCLUDE Datafile, DatafileFormat", idd);
+			assertTrue("Wrong datafile number", resultInv.getDatafiles().size() == 1);
+		} catch (IcatException_Exception e) {
+			e.printStackTrace();
+			fail();
+		} finally {
+			client.deleteEntities(ICATClient.ENTITY_INVESTIGATION, idi); // cascade to dataset
+		}
+	}
+	
+	@Test
+	public void testLargeDataset() throws ICATClientException {
+		long idi = client.createInvestigation("dummyInvestigation", "MA", "dummyVisit", "dummy title", "ID19", new GregorianCalendar());
+		long idd = client.createDataset("dummyInvestigation", "dummyVisit", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar(), null);
+		
+		final int nbdtf = 1100;
+		final List<DatafileDTO> files = new LinkedList<DatafileDTO>(); 
+		
+		for (int i = 0; i < nbdtf; i++) {
+			files.add(new DatafileDTOImpl("filename" + i, "/file/location", "edf", 0L));
+		}
+		client.createDatafiles(idd, files);
+		
+		try {
+			Dataset resultInv = (Dataset) client.get("Dataset INCLUDE Datafile", idd);
+			assertTrue("Wrong datafile number", resultInv.getDatafiles().size() == 1100);
+		} catch (IcatException_Exception e) {
+			e.printStackTrace();
+			fail();
+		} finally {
+			client.deleteEntities(ICATClient.ENTITY_INVESTIGATION, idi); // cascade to dataset
+		}
+
 	}
 
 }

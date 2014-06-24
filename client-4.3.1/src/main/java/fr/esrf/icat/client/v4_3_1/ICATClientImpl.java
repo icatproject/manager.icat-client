@@ -634,5 +634,13 @@ public class ICATClientImpl extends ICATClient {
 			LOG.debug("No investigation users found for " + inv.getName() + "[" + inv.getVisitId() +"]");
 		}
 	}
+
+	public ICAT getIcat() {
+		return icat;
+	}
+
+	public EntityBaseBean get(String string, long i) throws IcatException_Exception {
+		return icat.get(sessionId, string, i);
+	}
 	
 }
