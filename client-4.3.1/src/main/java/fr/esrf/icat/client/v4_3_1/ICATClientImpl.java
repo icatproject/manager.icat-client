@@ -62,6 +62,8 @@ import org.icatproject_4_3_1.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.xml.ws.util.StringUtils;
+
 import fr.esrf.icat.client.DatafileDTO;
 import fr.esrf.icat.client.DatasetParameterDTO;
 import fr.esrf.icat.client.ICATClient;
@@ -637,7 +639,7 @@ public class ICATClientImpl extends ICATClient {
 	}
 
 	@Override
-	public WrappedEntityBean get(String entity, long i) throws ICATClientException {
+	public WrappedEntityBean get(final String entity, final long i) throws ICATClientException {
 		try {
 			checkConnection();
 			return new WrappedEntityBeanImpl(getRaw(entity, i));
@@ -646,19 +648,49 @@ public class ICATClientImpl extends ICATClient {
 		}
 	}
 	
-	public EntityBaseBean getRaw(String entity, long i) throws IcatException_Exception {
+	public EntityBaseBean getRaw(final String entity, final long i) throws IcatException_Exception {
 		return icat.get(sessionId, entity, i);
 	}
 
 	@Override
-	public List<WrappedEntityBean> search(String query) throws ICATClientException {
+	public List<WrappedEntityBean> search(final String query) throws ICATClientException {
 		try {
+			checkConnection();
 			List<? extends Object> l = icat.search(sessionId, query);
 			List<WrappedEntityBean> retL = new LinkedList<>();
 			for(Object o : l) {
 				retL.add(new WrappedEntityBeanImpl(o));
 			}
 			return retL;
+		} catch (IcatException_Exception e) {
+			throw new ICATClientException(e);
+		}
+	}
+
+	@Override
+	public void update(final WrappedEntityBean bean) throws ICATClientException {
+		try {
+			checkConnection();
+			update((EntityBaseBean) bean.getWrapped());
+		} catch (IcatException_Exception e) {
+			throw new ICATClientException(e);
+		}
+	}
+
+	@Override
+	public WrappedEntityBean create(String entity) throws ICATClientException {
+		try {
+			return new WrappedEntityBeanImpl(Class.forName("org.icatproject_4_3_1." + StringUtils.capitalize(entity)).newInstance());
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			throw new ICATClientException(e);
+		}
+	}
+
+	@Override
+	public long create(WrappedEntityBean bean) throws ICATClientException {
+		try {
+			checkConnection();
+			return create((EntityBaseBean) bean.getWrapped());
 		} catch (IcatException_Exception e) {
 			throw new ICATClientException(e);
 		}

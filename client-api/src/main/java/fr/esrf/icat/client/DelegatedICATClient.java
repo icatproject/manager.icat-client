@@ -150,4 +150,19 @@ public class DelegatedICATClient extends ICATClient {
 		return delegate.search(query);
 	}
 
+	@Override
+	public void update(WrappedEntityBean bean) throws ICATClientException {
+		delegate.update(bean);
+	}
+
+	@Override
+	public WrappedEntityBean create(String entity) throws ICATClientException {
+		return delegate.create(entity);
+	}
+
+	@Override
+	public long create(WrappedEntityBean bean) throws ICATClientException {
+		return delegate.create(bean);
+	}
+
 }

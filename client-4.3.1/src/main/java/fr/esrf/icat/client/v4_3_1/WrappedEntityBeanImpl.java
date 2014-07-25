@@ -1,5 +1,28 @@
 package fr.esrf.icat.client.v4_3_1;
 
+/*
+ * #%L
+ * ICAT client 4.3.1
+ * %%
+ * Copyright (C) 2014 ESRF - The European Synchrotron
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/gpl-3.0.html>.
+ * #L%
+ */
+
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -16,8 +39,7 @@ public class WrappedEntityBeanImpl extends WrappedEntityBean {
 	}
 
 	@Override
-	public Object get(String field) throws IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException,
+	public Object get(String field) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
 		Object raw = getRaw(field);
 		if(raw instanceof EntityBaseBean) {
@@ -34,8 +56,7 @@ public class WrappedEntityBeanImpl extends WrappedEntityBean {
 	}
 
 	@Override
-	public void set(String field, Object value) throws IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException,
+	public void set(String field, Object value) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
 		if(value instanceof WrappedEntityBean) {
 			setRaw(field, ((WrappedEntityBean) value).getWrapped());
@@ -46,9 +67,15 @@ public class WrappedEntityBeanImpl extends WrappedEntityBean {
 			for(Object o : (Collection<?>)value) {
 				nList.add((EntityBaseBean) ((WrappedEntityBean)o).getWrapped());
 			}
+			setRaw(field, nList);
 			return;
 		}
 		setRaw(field, value);
+	}
+
+	@Override
+	protected boolean isEntityBean(Class<?> returnType) {
+		return EntityBaseBean.class.isAssignableFrom(returnType);
 	}
 
 }
