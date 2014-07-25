@@ -695,5 +695,14 @@ public class ICATClientImpl extends ICATClient {
 			throw new ICATClientException(e);
 		}
 	}
+
+	@Override
+	public List<String> getEntityNames() throws ICATClientException {
+		try {
+			return icat.getEntityNames();
+		} catch (IcatException_Exception e) {
+			throw new ICATClientException(e);
+		}
+	}
 	
 }

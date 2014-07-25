@@ -165,4 +165,9 @@ public class DelegatedICATClient extends ICATClient {
 		return delegate.create(bean);
 	}
 
+	@Override
+	public List<String> getEntityNames() throws ICATClientException {
+		return delegate.getEntityNames();
+	}
+
 }

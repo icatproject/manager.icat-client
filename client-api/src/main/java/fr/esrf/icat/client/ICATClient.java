@@ -242,4 +242,6 @@ public abstract class ICATClient {
 	public abstract WrappedEntityBean create(String entity) throws ICATClientException;
 	
 	public abstract long create(WrappedEntityBean bean) throws ICATClientException;
+	
+	public abstract List<String> getEntityNames() throws ICATClientException;
 }
