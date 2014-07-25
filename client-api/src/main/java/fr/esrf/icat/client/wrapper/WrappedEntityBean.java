@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class WrappedEntityBean {
+public abstract class WrappedEntityBean {
 
 	private static final String GETTER_PREFIX = "get";
 	private static final String SETTER_PREFIX = "set";
@@ -71,15 +71,22 @@ public class WrappedEntityBean {
 		return  Collections.unmodifiableList(_asFields);
 	}
 	
-	public Object get(String field) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+	public Object getWrapped() {
+		return wrapped;
+	}
+	
+	protected Object getRaw(String field) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		return wrapped.getClass().getMethod(getterName(field), (Class<?>[])null).invoke(wrapped, (Object[])null);
 	}
 	
-	public void set(String field, Object value) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+	protected void setRaw(String field, Object value) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		if(_roFields.contains(field) || _asFields.contains(field)) {
 			throw new NoSuchMethodException("Field " + field + " is not mutable");
 		}
 		wrapped.getClass().getMethod(setterName(field), value.getClass()).invoke(wrapped, value);
 	}
+
+	public abstract Object get(String field) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException;
 	
+	public abstract void set(String field, Object value) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException;
 }

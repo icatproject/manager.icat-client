@@ -67,6 +67,7 @@ import fr.esrf.icat.client.DatasetParameterDTO;
 import fr.esrf.icat.client.ICATClient;
 import fr.esrf.icat.client.ICATClientException;
 import fr.esrf.icat.client.UserDTO;
+import fr.esrf.icat.client.wrapper.WrappedEntityBean;
 
 public class ICATClientImpl extends ICATClient {
 
@@ -635,12 +636,32 @@ public class ICATClientImpl extends ICATClient {
 		}
 	}
 
-	public ICAT getIcat() {
-		return icat;
+	@Override
+	public WrappedEntityBean get(String entity, long i) throws ICATClientException {
+		try {
+			checkConnection();
+			return new WrappedEntityBeanImpl(getRaw(entity, i));
+		} catch (IcatException_Exception e) {
+			throw new ICATClientException(e);
+		}
+	}
+	
+	public EntityBaseBean getRaw(String entity, long i) throws IcatException_Exception {
+		return icat.get(sessionId, entity, i);
 	}
 
-	public EntityBaseBean get(String string, long i) throws IcatException_Exception {
-		return icat.get(sessionId, string, i);
+	@Override
+	public List<WrappedEntityBean> search(String query) throws ICATClientException {
+		try {
+			List<? extends Object> l = icat.search(sessionId, query);
+			List<WrappedEntityBean> retL = new LinkedList<>();
+			for(Object o : l) {
+				retL.add(new WrappedEntityBeanImpl(o));
+			}
+			return retL;
+		} catch (IcatException_Exception e) {
+			throw new ICATClientException(e);
+		}
 	}
 	
 }

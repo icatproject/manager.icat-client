@@ -27,6 +27,8 @@ import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import fr.esrf.icat.client.wrapper.WrappedEntityBean;
+
 public abstract class ICATClient {
 
 	/**
@@ -230,4 +232,8 @@ public abstract class ICATClient {
 			createDatasetParameter(datasetID, dtspd);
 		}
 	}
+	
+	public abstract WrappedEntityBean get(String entity, long id) throws ICATClientException;
+	
+	public abstract List<WrappedEntityBean> search(String query) throws ICATClientException;
 }

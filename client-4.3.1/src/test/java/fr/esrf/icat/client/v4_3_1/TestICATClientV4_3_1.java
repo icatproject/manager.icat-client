@@ -153,7 +153,7 @@ public class TestICATClientV4_3_1 {
 		client.createDatafile(idd, "filename", "/file/location", "edf", 0L);
 		
 		try {
-			Dataset resultInv = (Dataset) client.get("Dataset INCLUDE Datafile, DatafileFormat", idd);
+			Dataset resultInv = (Dataset) client.getRaw("Dataset INCLUDE Datafile, DatafileFormat", idd);
 			assertTrue("Wrong datafile number", resultInv.getDatafiles().size() == 1);
 		} catch (IcatException_Exception e) {
 			e.printStackTrace();
@@ -177,7 +177,7 @@ public class TestICATClientV4_3_1 {
 		client.createDatafiles(idd, files);
 		
 		try {
-			Dataset resultInv = (Dataset) client.get("Dataset INCLUDE Datafile", idd);
+			Dataset resultInv = (Dataset) client.getRaw("Dataset INCLUDE Datafile", idd);
 			assertTrue("Wrong datafile number", resultInv.getDatafiles().size() == 1100);
 		} catch (IcatException_Exception e) {
 			e.printStackTrace();

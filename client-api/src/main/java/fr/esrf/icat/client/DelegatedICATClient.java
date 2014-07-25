@@ -27,6 +27,8 @@ import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import fr.esrf.icat.client.wrapper.WrappedEntityBean;
+
 
 public class DelegatedICATClient extends ICATClient {
 
@@ -136,6 +138,16 @@ public class DelegatedICATClient extends ICATClient {
 	@Override
 	public void createDatasetParameters(long datasetID, Collection<DatasetParameterDTO> datasetParamCollection) throws ICATClientException {
 		delegate.createDatasetParameters(datasetID, datasetParamCollection);
+	}
+
+	@Override
+	public WrappedEntityBean get(String entity, long id) throws ICATClientException {
+		return delegate.get(entity, id);
+	}
+
+	@Override
+	public List<WrappedEntityBean> search(String query) throws ICATClientException {
+		return delegate.search(query);
 	}
 
 }
