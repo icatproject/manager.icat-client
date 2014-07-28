@@ -56,42 +56,64 @@ public abstract class WrappedEntityBean {
 
 	public WrappedEntityBean(final Object wrapped) {
 		super();
-		this.wrapped = wrapped;
+
 		_rwFields = new LinkedList<String>();
 		_roFields = new LinkedList<String>();
 		_asFields = new LinkedList<String>();
 		_enFields = new LinkedList<String>();
 		_fieldTypes = new HashMap<>();
 		
-		XmlType directXmlTypes = wrapped.getClass().getAnnotation(XmlType.class);
-		if(null != directXmlTypes) {
-			for (String field : directXmlTypes.propOrder()) {
-				try {
-					Class<?> returnType = wrapped.getClass().getDeclaredField(field).getType();
-					_fieldTypes.put(field, returnType);
-					if (Arrays.asList(returnType.getInterfaces()).contains(Collection.class)) {
-						_asFields.add(field);
-					} else {
-						_rwFields.add(field);
-						if (isEntityBean(returnType)){
-							_enFields.add(field);
-						}					}
-				} catch (SecurityException | NoSuchFieldException e) {
-					LOG.warn("Unable to analyse field " + field, e);
+		this.wrapped = wrapped;
+		processClass(this.wrapped.getClass());
+	}
+
+	private void processClass(final Class<?> wClass) {
+		if(null == wClass) {
+			return;
+		}
+		if(wClass.getSuperclass().equals(Object.class)) {
+			processTop(wClass);
+		} else {
+			processHierachy(wClass);
+			processClass(wClass.getSuperclass());
+		}
+	}
+
+	private void processHierachy(Class<?> wClass) {
+		XmlType directXmlTypes = wClass.getAnnotation(XmlType.class);
+		if(null == directXmlTypes) {
+			return;
+		}
+		for (String field : directXmlTypes.propOrder()) {
+			try {
+				Class<?> returnType = wClass.getDeclaredField(field).getType();
+				_fieldTypes.put(field, returnType);
+				if (Arrays.asList(returnType.getInterfaces()).contains(Collection.class)) {
+					_asFields.add(field);
+				} else {
+					_rwFields.add(field);
+					if (isEntityBean(returnType)){
+						_enFields.add(field);
+					}
 				}
+			} catch (SecurityException | NoSuchFieldException e) {
+				LOG.warn("Unable to analyse field " + field, e);
 			}
 		}
+	}
 
-		XmlType parentXmlTypes = wrapped.getClass().getSuperclass().getAnnotation(XmlType.class);
-		if(null != parentXmlTypes) {
-			for (String field : parentXmlTypes.propOrder()) {
-				try {
-					Class<?> returnType = wrapped.getClass().getSuperclass().getDeclaredField(field).getType();
-					_fieldTypes.put(field, returnType);
-					_roFields.add(field);
-				} catch (NoSuchFieldException | SecurityException e) {
-					LOG.warn("Unable to analyse parent field " + field, e);
-				}
+	private void processTop(final Class<?> wClass) {
+		XmlType directXmlTypes = wClass.getAnnotation(XmlType.class);
+		if(null == directXmlTypes) {
+			return;
+		}
+		for (String field : directXmlTypes.propOrder()) {
+			try {
+				Class<?> returnType = wClass.getDeclaredField(field).getType();
+				_fieldTypes.put(field, returnType);
+				_roFields.add(field);
+			} catch (NoSuchFieldException | SecurityException e) {
+				LOG.warn("Unable to analyse parent field " + field, e);
 			}
 		}
 	}
