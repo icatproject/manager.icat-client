@@ -27,16 +27,23 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlType;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class WrappedEntityBean {
 
+	private final static Logger LOG = LoggerFactory.getLogger(WrappedEntityBean.class);
+	
 	private static final String GETTER_PREFIX = "get";
+	private static final String BOOLEAN_PREFIX = "is";
 	private static final String SETTER_PREFIX = "set";
 
 	private Object wrapped;
@@ -45,6 +52,7 @@ public abstract class WrappedEntityBean {
 	private List<String> _roFields;
 	private List<String> _asFields;
 	private List<String> _enFields;
+	private Map<String, Class<?>> _fieldTypes;
 
 	public WrappedEntityBean(final Object wrapped) {
 		super();
@@ -53,37 +61,50 @@ public abstract class WrappedEntityBean {
 		_roFields = new LinkedList<String>();
 		_asFields = new LinkedList<String>();
 		_enFields = new LinkedList<String>();
+		_fieldTypes = new HashMap<>();
 		
 		XmlType directXmlTypes = wrapped.getClass().getAnnotation(XmlType.class);
 		if(null != directXmlTypes) {
-			for (String s : directXmlTypes.propOrder()) {
-				String m = getterName(s);
+			for (String field : directXmlTypes.propOrder()) {
 				try {
-					Class<?> returnType = wrapped.getClass().getMethod(m, (Class<?>[])null).getReturnType();
+					Class<?> returnType = wrapped.getClass().getDeclaredField(field).getType();
+					_fieldTypes.put(field, returnType);
 					if (Arrays.asList(returnType.getInterfaces()).contains(Collection.class)) {
-						_asFields.add(s);
+						_asFields.add(field);
 					} else {
-						_rwFields.add(s);
+						_rwFields.add(field);
 						if (isEntityBean(returnType)){
-							_enFields.add(s);
+							_enFields.add(field);
 						}					}
-				} catch (NoSuchMethodException | SecurityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				} catch (SecurityException | NoSuchFieldException e) {
+					LOG.warn("Unable to analyse field " + field, e);
 				}
 			}
 		}
 
 		XmlType parentXmlTypes = wrapped.getClass().getSuperclass().getAnnotation(XmlType.class);
 		if(null != parentXmlTypes) {
-			_roFields.addAll(Arrays.asList(parentXmlTypes.propOrder()));
+			for (String field : parentXmlTypes.propOrder()) {
+				try {
+					Class<?> returnType = wrapped.getClass().getSuperclass().getDeclaredField(field).getType();
+					_fieldTypes.put(field, returnType);
+					_roFields.add(field);
+				} catch (NoSuchFieldException | SecurityException e) {
+					LOG.warn("Unable to analyse parent field " + field, e);
+				}
+			}
 		}
 	}
 
 	protected abstract boolean isEntityBean(Class<?> returnType);
 
 	private String getterName(final String field) {
-		return GETTER_PREFIX + StringUtils.capitalize(field);
+		return (isBooleanField(field) ? BOOLEAN_PREFIX : GETTER_PREFIX) + StringUtils.capitalize(field);
+	}
+
+	private boolean isBooleanField(final String field)  {
+		Class<?> clazz = _fieldTypes.get(field);
+		return null == clazz ? false : (clazz.equals(boolean.class) || clazz.equals(Boolean.class));
 	}
 
 	private String setterName(final String field) {
@@ -144,4 +165,9 @@ public abstract class WrappedEntityBean {
 	public boolean isAssociation(final String field) {
 		return _asFields.contains(field);
 	}
+	
+	public Class<?> getReturnType(final String field) {
+		return _fieldTypes.get(field);
+	}
+	
 }
