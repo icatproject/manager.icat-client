@@ -75,7 +75,9 @@ public abstract class WrappedEntityBean {
 		}
 
 		XmlType parentXmlTypes = wrapped.getClass().getSuperclass().getAnnotation(XmlType.class);
-		_roFields.addAll(Arrays.asList(parentXmlTypes.propOrder()));
+		if(null != parentXmlTypes) {
+			_roFields.addAll(Arrays.asList(parentXmlTypes.propOrder()));
+		}
 	}
 
 	protected abstract boolean isEntityBean(Class<?> returnType);
