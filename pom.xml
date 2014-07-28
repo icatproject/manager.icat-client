@@ -5,11 +5,11 @@
   <parent>
   	<groupId>fr.esrf.icat</groupId>
   	<artifactId>icat-super-pom</artifactId>
-  	<version>1.4</version>
+  	<version>1.5-SNAPSHOT</version>
   </parent>
 
   <artifactId>icat-client-parent</artifactId>
-  <version>0.3</version>
+  <version>0.4-SNAPSHOT</version>
   <packaging>pom</packaging>
   
   <name>ICAT client parent pom</name>
@@ -20,7 +20,7 @@
   	<developerConnection>scm:git:git@gitlab.esrf.fr:icat/icat-client.git</developerConnection>
   	<connection>scm:git:http://gitlab.esrf.fr/icat/icat-client.git</connection>
   	<url>http://gitlab.esrf.fr/icat/icat-client</url>
-    <tag>release-v0.3</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <modules>
