@@ -642,7 +642,7 @@ public class ICATClientImpl extends ICATClient {
 	public WrappedEntityBean get(final String entity, final long i) throws ICATClientException {
 		try {
 			checkConnection();
-			return new WrappedEntityBeanImpl(getRaw(entity, i));
+			return new WrappedEntityBean(getRaw(entity, i));
 		} catch (IcatException_Exception e) {
 			throw new ICATClientException(e);
 		}
@@ -659,7 +659,7 @@ public class ICATClientImpl extends ICATClient {
 			List<? extends Object> l = icat.search(sessionId, query);
 			List<WrappedEntityBean> retL = new LinkedList<>();
 			for(Object o : l) {
-				retL.add(new WrappedEntityBeanImpl(o));
+				retL.add(new WrappedEntityBean(o));
 			}
 			return retL;
 		} catch (IcatException_Exception e) {
@@ -678,16 +678,16 @@ public class ICATClientImpl extends ICATClient {
 	}
 
 	@Override
-	public WrappedEntityBean create(String entity) throws ICATClientException {
+	public WrappedEntityBean create(final String entity) throws ICATClientException {
 		try {
-			return new WrappedEntityBeanImpl(Class.forName("org.icatproject_4_3_1." + StringUtils.capitalize(entity)).newInstance());
+			return new WrappedEntityBean(Class.forName("org.icatproject_4_3_1." + StringUtils.capitalize(entity)).newInstance());
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			throw new ICATClientException(e);
 		}
 	}
 
 	@Override
-	public long create(WrappedEntityBean bean) throws ICATClientException {
+	public long create(final WrappedEntityBean bean) throws ICATClientException {
 		try {
 			checkConnection();
 			return create((EntityBaseBean) bean.getWrapped());
