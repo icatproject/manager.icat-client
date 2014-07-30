@@ -46,13 +46,13 @@ public class BeanFieldMapping {
 	private static final String BOOLEAN_PREFIX = "is";
 	private static final String SETTER_PREFIX = "set";
 
-	private List<String> _rwFields;
-	private List<String> _roFields;
-	private List<String> _asFields;
-	private List<String> _enFields;
-	private Map<String, Class<?>> _fieldTypes;
-	private Map<String, Method> _setters;
-	private Map<String, Method> _getters;
+	private final List<String> _rwFields;
+	private final List<String> _roFields;
+	private final List<String> _asFields;
+	private final List<String> _enFields;
+	private final Map<String, Class<?>> _fieldTypes;
+	private final Map<String, Method> _setters;
+	private final Map<String, Method> _getters;
 
 	public BeanFieldMapping(final Class<?> clazz) {
 		super();

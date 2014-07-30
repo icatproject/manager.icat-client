@@ -38,7 +38,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import fr.esrf.icat.client.DatafileDTO;
-import fr.esrf.icat.client.ICATClient;
 import fr.esrf.icat.client.ICATClientException;
 import fr.esrf.icat.client.UserDTO;
 import fr.esrf.icat.client.data.DatafileDTOImpl;
@@ -84,7 +83,7 @@ public class TestICATClientV4_3_1 {
 			// pass
 		}
 		
-		client.deleteEntities(ICATClient.ENTITY_INVESTIGATION, id);
+		client.deleteEntities(ICATClientImpl.ENTITY_INVESTIGATION, id);
 	}
 	
 	@Test
@@ -99,8 +98,8 @@ public class TestICATClientV4_3_1 {
 		
 		assertTrue("Users not created correctly", idu != null && idu.size() == 2);
 		
-		client.deleteEntities(ICATClient.ENTITY_INVESTIGATION, id);
-		client.deleteEntities(ICATClient.ENTITY_USER, idu.toArray(new Long[idu.size()]));
+		client.deleteEntities(ICATClientImpl.ENTITY_INVESTIGATION, id);
+		client.deleteEntities(ICATClientImpl.ENTITY_USER, idu.toArray(new Long[idu.size()]));
 	}
 	
 	@Test
@@ -124,7 +123,7 @@ public class TestICATClientV4_3_1 {
 			// pass
 		}
 		
-		client.deleteEntities(ICATClient.ENTITY_INVESTIGATION, idi); // cascade to dataset
+		client.deleteEntities(ICATClientImpl.ENTITY_INVESTIGATION, idi); // cascade to dataset
 	}
 	
 	@Test
@@ -142,7 +141,7 @@ public class TestICATClientV4_3_1 {
 			// pass
 		}
 		
-		client.deleteEntities(ICATClient.ENTITY_INVESTIGATION, idi); // cascade to dataset
+		client.deleteEntities(ICATClientImpl.ENTITY_INVESTIGATION, idi); // cascade to dataset
 	}
 	
 	@Test
@@ -159,7 +158,7 @@ public class TestICATClientV4_3_1 {
 			e.printStackTrace();
 			fail();
 		} finally {
-			client.deleteEntities(ICATClient.ENTITY_INVESTIGATION, idi); // cascade to dataset
+			client.deleteEntities(ICATClientImpl.ENTITY_INVESTIGATION, idi); // cascade to dataset
 		}
 	}
 	
@@ -183,7 +182,7 @@ public class TestICATClientV4_3_1 {
 			e.printStackTrace();
 			fail();
 		} finally {
-			client.deleteEntities(ICATClient.ENTITY_INVESTIGATION, idi); // cascade to dataset
+			client.deleteEntities(ICATClientImpl.ENTITY_INVESTIGATION, idi); // cascade to dataset
 		}
 
 	}

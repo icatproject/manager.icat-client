@@ -31,8 +31,8 @@ import java.util.List;
 
 public class WrappedEntityBean {
 
-	private Object wrapped;
-	private BeanFieldMapping mapping;
+	private final Object wrapped;
+	private final BeanFieldMapping mapping;
 	
 	public WrappedEntityBean(final Object wrapped) {
 		super();

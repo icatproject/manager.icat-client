@@ -34,14 +34,14 @@ public class MappingManager {
 		return instance;
 	}
 	
-	private ConcurrentMap<Class<?>, BeanFieldMapping> _mappingMap;
+	private final ConcurrentMap<Class<?>, BeanFieldMapping> _mappingMap;
 	
 	private MappingManager() {
 		super();
 		_mappingMap = new ConcurrentHashMap<>();
 	}
 	
-	public BeanFieldMapping getMapping(Class<?> clazz) {
+	public BeanFieldMapping getMapping(final Class<?> clazz) {
 		BeanFieldMapping mapping = _mappingMap.get(clazz);
 		BeanFieldMapping m = null;
 		if(null == mapping) {

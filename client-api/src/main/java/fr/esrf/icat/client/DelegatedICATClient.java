@@ -30,7 +30,7 @@ import java.util.List;
 import fr.esrf.icat.client.wrapper.WrappedEntityBean;
 
 
-public class DelegatedICATClient extends ICATClient {
+public class DelegatedICATClient extends ICATClientSkeleton {
 
 	private ICATClient delegate;
 
@@ -38,7 +38,7 @@ public class DelegatedICATClient extends ICATClient {
 		super();
 	}
 
-	public ICATClient getDelegate() {
+	public SimpleICATClient getDelegate() {
 		return delegate;
 	}
 

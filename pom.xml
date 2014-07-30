@@ -26,6 +26,7 @@
   <modules>
     <module>client-api</module>
     <module>client-4.3.1</module>
+    <module>client-dynamic</module>
   </modules>
  
   <repositories>

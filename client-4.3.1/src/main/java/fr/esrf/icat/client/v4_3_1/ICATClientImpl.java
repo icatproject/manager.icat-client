@@ -38,6 +38,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 
+import org.apache.commons.lang3.StringUtils;
 import org.icatproject_4_3_1.Datafile;
 import org.icatproject_4_3_1.DatafileFormat;
 import org.icatproject_4_3_1.Dataset;
@@ -62,16 +63,15 @@ import org.icatproject_4_3_1.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.xml.ws.util.StringUtils;
-
 import fr.esrf.icat.client.DatafileDTO;
 import fr.esrf.icat.client.DatasetParameterDTO;
 import fr.esrf.icat.client.ICATClient;
 import fr.esrf.icat.client.ICATClientException;
+import fr.esrf.icat.client.ICATClientSkeleton;
 import fr.esrf.icat.client.UserDTO;
 import fr.esrf.icat.client.wrapper.WrappedEntityBean;
 
-public class ICATClientImpl extends ICATClient {
+public class ICATClientImpl extends ICATClientSkeleton {
 
 	private final static Logger LOG = LoggerFactory.getLogger(ICATClient.class);
 	
