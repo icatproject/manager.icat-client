@@ -51,6 +51,7 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 			final Object[] response = client.invoke("getApiVersion", (Object) null);
 			LOG.debug("ICAT Version: "+ response[0].toString());
 		} catch (Exception e) {
+			LOG.error("Unable to initialise dynamic client", e);
 			throw new IllegalStateException("Unable to initialise DynamicSimpleICATClient", e);
 		}
 	}
