@@ -26,6 +26,19 @@
 	</dependency>
 
 	<dependency>
+	    <groupId>org.apache.cxf</groupId>
+	    <artifactId>cxf-tools-common</artifactId>
+	    <version>3.0.1</version>
+	</dependency>
+
+	<dependency>
+	    <groupId>org.apache.cxf</groupId>
+	    <artifactId>cxf-rt-transports-http-jetty</artifactId>
+	    <version>3.0.1</version>
+	    <scope>test</scope>
+	</dependency>
+
+	<dependency>
 		<groupId>junit</groupId>
 		<artifactId>junit</artifactId>
 	</dependency>

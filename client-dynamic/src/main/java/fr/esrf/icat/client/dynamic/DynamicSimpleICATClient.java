@@ -1,6 +1,6 @@
 package fr.esrf.icat.client.dynamic;
 
-import java.beans.PropertyDescriptor;
+import java.io.File;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,13 +8,9 @@ import java.util.List;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.cxf.common.jaxb.JAXBUtils;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.jaxws.endpoint.dynamic.JaxWsDynamicClientFactory;
-import org.apache.cxf.service.model.BindingInfo;
-import org.apache.cxf.service.model.BindingMessageInfo;
-import org.apache.cxf.service.model.BindingOperationInfo;
-import org.apache.cxf.service.model.MessagePartInfo;
-import org.apache.cxf.service.model.ServiceInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,14 +22,11 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 
 	private final static Logger LOG = LoggerFactory.getLogger(DynamicSimpleICATClient.class);
 	
-	private final static String ICAT_PACKAGE = "org.icatproject";
-	private final static String ICAT_BINDING = "ICATPortBinding";
-
 	private Client client;
 	
-//	private ServiceInfo serviceInfo;
-
 	private String sessionId;
+
+	private String packageName;
 	
 	public DynamicSimpleICATClient() {
 		super();
@@ -42,11 +35,17 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 	@Override
 	public void doInit() {
 		try {
-			URL base = new URL(getIcatBaseUrl());
-			URL icatUrl = new URL(base, ICAT_SERVICE_URL);
+			final String icatBaseUrl = getIcatBaseUrl();
+			URL icatUrl = new URL(new URL(icatBaseUrl), ICAT_SERVICE_URL);
 			LOG.debug("Using ICAT service at " + icatUrl.toString());
 			QName qName = new QName(ICATPROJECT_NAMESPACE, ICAT_SERVICE_NAME);
-			client = JaxWsDynamicClientFactory.newInstance().createClient(icatUrl, qName);
+			
+			packageName = JAXBUtils.namespaceURIToPackage(icatBaseUrl);
+			File file = org.apache.cxf.tools.util.JAXBUtils.getPackageMappingSchemaBindingFile(ICATPROJECT_NAMESPACE, packageName);
+			List<String> bindings = new LinkedList<>();
+			bindings.add(file.toURI().toString());
+			
+			client = JaxWsDynamicClientFactory.newInstance().createClient(icatUrl, qName, bindings);
 //			serviceInfo = client.getEndpoint().getService().getServiceInfos().get(0);
 			final Object[] response = client.invoke("getApiVersion", (Object) null);
 			LOG.debug("ICAT Version: "+ response[0].toString());
@@ -63,13 +62,13 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 
 		try {
 			final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-			final Class<?> loginClass = contextClassLoader.loadClass(ICAT_PACKAGE + ".Login");
-			final Class<?> credentialsClass = contextClassLoader.loadClass(ICAT_PACKAGE + ".Login$Credentials");
+			final Class<?> loginClass = contextClassLoader.loadClass(packageName + ".Login");
+			final Class<?> credentialsClass = contextClassLoader.loadClass(packageName + ".Login$Credentials");
 			final Object credentials = credentialsClass.newInstance();
 			
 			final Object entries = credentialsClass.getMethod("getEntry", (Class<?>[]) null).invoke(credentials, (Object[])null);
 			
-			final Class<?> entryClass = contextClassLoader.loadClass(ICAT_PACKAGE + ".Login$Credentials$Entry");
+			final Class<?> entryClass = contextClassLoader.loadClass(packageName + ".Login$Credentials$Entry");
 			
 			final Class<?>[] stringParam = new Class<?>[]{String.class};
 
@@ -101,43 +100,6 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 		}
 	}
 	
-//	private Object clientCall(final String call, final String[] properties, final Object[] values) throws Exception {
-//        QName bindingName = new QName(ICATPROJECT_NAMESPACE, ICAT_BINDING);
-//        BindingInfo binding = serviceInfo.getBinding(bindingName);
-//        //{
-//        QName opName = new QName(ICATPROJECT_NAMESPACE, call);
-//        BindingOperationInfo boi = binding.getOperation(opName);
-//        BindingMessageInfo inputMessageInfo = boi.getInput();
-//        List<MessagePartInfo> parts = inputMessageInfo.getMessageParts();
-//        // only one part.
-//        MessagePartInfo partInfo = parts.get(0);
-//        Class<?> partClass = partInfo.getTypeClass();
-//        System.out.println(partClass.getCanonicalName()); // GetAgentDetails
-//        Object inputObject = partClass.newInstance();
-//        // Unfortunately, the slot inside of the part object is also called 'part'.
-//        // this is the descriptor for get/set part inside the GetAgentDetails class.
-//        PropertyDescriptor partPropertyDescriptor = new PropertyDescriptor("part", partClass);
-//        // This is the type of the class which really contains all the parameter information.
-//        Class<?> partPropType = partPropertyDescriptor.getPropertyType(); // AgentWSRequest
-//        System.out.println(partPropType.getCanonicalName());
-//        Object inputPartObject = partPropType.newInstance();
-//        partPropertyDescriptor.getWriteMethod().invoke(inputObject, inputPartObject);
-//        PropertyDescriptor numberPropertyDescriptor = new PropertyDescriptor(properties[0], partPropType);
-//        numberPropertyDescriptor.getWriteMethod().invoke(inputPartObject, values[0]);
-//
-//        Object[] result = client.invoke(opName, inputObject);
-//        Class<?> resultClass = result[0].getClass();
-//        System.out.println(resultClass.getCanonicalName()); // GetAgentDetailsResponse
-//        return result[0];
-////        PropertyDescriptor resultDescriptor = new PropertyDescriptor("agentWSResponse", resultClass);
-////        Object wsResponse = resultDescriptor.getReadMethod().invoke(result[0]);
-////        Class<?> wsResponseClass = wsResponse.getClass();
-////        System.out.println(wsResponseClass.getCanonicalName());
-////        PropertyDescriptor agentNameDescriptor = new PropertyDescriptor("agentName", wsResponseClass);
-////        String agentName = (String)agentNameDescriptor.getReadMethod().invoke(wsResponse);
-////        System.out.println("Agent name: " + agentName);
-//    }
-
 	@Override
 	public long refreshConnection() throws ICATClientException {
 		try {
@@ -228,7 +190,7 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 	public WrappedEntityBean create(String entity) throws ICATClientException {
 		try {
 			return new WrappedEntityBean(Thread.currentThread().getContextClassLoader()
-					.loadClass(ICAT_PACKAGE + "." + StringUtils.capitalize(entity)).newInstance());
+					.loadClass(packageName + "." + StringUtils.capitalize(entity)).newInstance());
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			throw new ICATClientException(e);
 		}
