@@ -170,4 +170,9 @@ public class DelegatedICATClient extends ICATClientSkeleton {
 		return delegate.getEntityNames();
 	}
 
+	@Override
+	public void delete(WrappedEntityBean bean) throws ICATClientException {
+		delegate.delete(bean);
+	}
+
 }

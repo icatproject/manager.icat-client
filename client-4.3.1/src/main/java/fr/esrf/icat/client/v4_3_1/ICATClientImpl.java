@@ -704,5 +704,16 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			throw new ICATClientException(e);
 		}
 	}
+
+
+	@Override
+	public void delete(WrappedEntityBean bean) throws ICATClientException {
+		checkConnection();
+		try {
+			icat.delete(sessionId, (EntityBaseBean) bean.getWrapped());
+		} catch (IcatException_Exception e) {
+			throw new ICATClientException(e);
+		}
+	}
 	
 }

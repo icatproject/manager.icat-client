@@ -93,5 +93,7 @@ public interface SimpleICATClient {
 	public abstract long create(WrappedEntityBean bean) throws ICATClientException;
 
 	public abstract List<String> getEntityNames() throws ICATClientException;
+	
+	public abstract void delete(WrappedEntityBean bean) throws ICATClientException;
 
 }
