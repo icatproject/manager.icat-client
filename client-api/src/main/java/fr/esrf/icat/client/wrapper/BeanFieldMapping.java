@@ -32,6 +32,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
 import org.apache.commons.lang3.StringUtils;
@@ -135,7 +136,7 @@ public class BeanFieldMapping {
 	}
 
 	public static boolean isEntityBean(final Class<?> returnType) {
-		return returnType.getAnnotation(XmlType.class) != null;
+		return returnType.getAnnotation(XmlType.class) != null && returnType.getAnnotation(XmlEnum.class) == null;
 	}
 
 	public List<String> getMutableFields() {

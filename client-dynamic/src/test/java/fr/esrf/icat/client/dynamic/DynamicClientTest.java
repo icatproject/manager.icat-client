@@ -3,6 +3,7 @@ package fr.esrf.icat.client.dynamic;
 import static org.junit.Assert.*;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 
 import org.junit.After;
@@ -10,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import fr.esrf.icat.client.SimpleICATClient;
+import fr.esrf.icat.client.wrapper.WrappedEntityBean;
 
 public class DynamicClientTest {
 
@@ -39,14 +41,20 @@ public class DynamicClientTest {
 	}
 
 	@Test
-	public void test() {
-		// nothing yet
+	public void testEnum() throws Exception {
+		List<WrappedEntityBean> l = client.search("ParameterType INCLUDE 1");
+		for(WrappedEntityBean b : l) {
+			final Object object = b.get("valueType");
+			assertTrue("This field should be an enum", object instanceof Enum);
+			System.out.println(object.toString());
+		}
+		
 	}
 	
 	public static void main(String[] args) throws Exception {
 		DynamicClientTest me = new DynamicClientTest();
 		me.setUp();
-		me.test();
+		me.testEnum();
 		me.tearDown();
 	}
 }
