@@ -230,4 +230,14 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 		}
 	}
 
+	@Override
+	public String getServerVersion() throws ICATClientException {
+		checkConnection();
+		try {
+			return client.invoke("getApiVersion", sessionId)[0].toString();
+		} catch (Exception e) {
+			throw new ICATClientException(e);
+		}
+	}
+
 }

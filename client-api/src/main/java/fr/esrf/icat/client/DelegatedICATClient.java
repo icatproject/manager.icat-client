@@ -175,4 +175,9 @@ public class DelegatedICATClient extends ICATClientSkeleton {
 		delegate.delete(bean);
 	}
 
+	@Override
+	public String getServerVersion() throws ICATClientException {
+		return delegate.getServerVersion();
+	}
+
 }

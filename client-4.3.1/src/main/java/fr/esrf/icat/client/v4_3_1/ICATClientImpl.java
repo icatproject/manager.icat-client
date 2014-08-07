@@ -698,6 +698,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 
 	@Override
 	public List<String> getEntityNames() throws ICATClientException {
+		checkConnection();
 		try {
 			return icat.getEntityNames();
 		} catch (IcatException_Exception e) {
@@ -705,12 +706,21 @@ public class ICATClientImpl extends ICATClientSkeleton {
 		}
 	}
 
-
 	@Override
 	public void delete(WrappedEntityBean bean) throws ICATClientException {
 		checkConnection();
 		try {
 			icat.delete(sessionId, (EntityBaseBean) bean.getWrapped());
+		} catch (IcatException_Exception e) {
+			throw new ICATClientException(e);
+		}
+	}
+
+	@Override
+	public String getServerVersion() throws ICATClientException {
+		checkConnection();
+		try {
+			return icat.getApiVersion();
 		} catch (IcatException_Exception e) {
 			throw new ICATClientException(e);
 		}
