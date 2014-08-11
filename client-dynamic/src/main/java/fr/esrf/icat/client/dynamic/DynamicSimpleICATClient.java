@@ -1,9 +1,20 @@
 package fr.esrf.icat.client.dynamic;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.Closeable;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.namespace.QName;
 
@@ -21,6 +32,16 @@ import fr.esrf.icat.client.wrapper.WrappedEntityBean;
 public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 
 	private final static Logger LOG = LoggerFactory.getLogger(DynamicSimpleICATClient.class);
+
+	private static final String QUOTE = "\"";
+
+	private static final String SCHEMA_LOCATION_TAG = "schemaLocation=";
+
+	private final static String SCHEMA_LOCATION_PATTERN = SCHEMA_LOCATION_TAG + QUOTE + "(.+?)" + QUOTE;
+	
+	private final static String ELEMENT_REF_PATTERN = "ref=\"tns:(.+?)\"";
+
+	private final static String ELEMENT_REF_REPLACE = "name=\"$1\" type=\"tns:$1\"";
 	
 	private Client client;
 	
@@ -34,24 +55,104 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 
 	@Override
 	public void doInit() {
+		InputStream urlStream = null;
+		BufferedReader reader = null;
+		BufferedWriter writer = null;
 		try {
 			final String icatBaseUrl = getIcatBaseUrl();
 			URL icatUrl = new URL(new URL(icatBaseUrl), ICAT_SERVICE_URL);
 			LOG.debug("Using ICAT service at " + icatUrl.toString());
 			QName qName = new QName(ICATPROJECT_NAMESPACE, ICAT_SERVICE_NAME);
 			
+			// ADDED: modify the wsdl on the fly to avoid the namespace issue
+			// this will have to do until a better solution is found
+			
+			final File initialWSDL = File.createTempFile("initial", "wsdl");
+			initialWSDL.deleteOnExit();
+			
+			urlStream = icatUrl.openStream();
+			Files.copy(urlStream, initialWSDL.toPath(),  StandardCopyOption.REPLACE_EXISTING);
+			urlStream.close();
+			
+			final File modifiedWSDL = File.createTempFile("modified", "wsdl");
+			modifiedWSDL.deleteOnExit();
+			
+			final File modifiedXSD = File.createTempFile("modified", "xsd");
+			modifiedXSD.deleteOnExit();
+
+			reader = new BufferedReader(new FileReader(initialWSDL));
+			writer = new BufferedWriter(new FileWriter(modifiedWSDL));
+			String line;
+			String schemaLocationUrl = null;
+			boolean found = false;
+			Pattern pattern = Pattern.compile(SCHEMA_LOCATION_PATTERN);
+			while((line = reader.readLine()) != null) {
+				if(!found) {
+					final Matcher matcher = pattern.matcher(line);
+					if(matcher.find()) {
+						StringBuffer sb = new StringBuffer();
+						schemaLocationUrl = matcher.group(1);
+						matcher.appendReplacement(sb, SCHEMA_LOCATION_TAG + QUOTE + modifiedXSD.toURI().toURL().toString() + QUOTE);
+						matcher.appendTail(sb);
+						line = sb.toString();
+					}
+				}
+				writer.write(line);
+				writer.newLine();
+			}
+			reader.close();
+			writer.close();
+			
+			if(null != schemaLocationUrl) {
+				
+				final File initialXSD = File.createTempFile("initial", "xsd");
+				initialXSD.deleteOnExit();
+				
+				urlStream = new URL(schemaLocationUrl).openStream();
+				Files.copy(urlStream, initialXSD.toPath(),  StandardCopyOption.REPLACE_EXISTING);
+				urlStream.close();
+				
+				reader = new BufferedReader(new FileReader(initialXSD));
+				writer = new BufferedWriter(new FileWriter(modifiedXSD));
+				pattern = Pattern.compile(ELEMENT_REF_PATTERN);
+				while((line = reader.readLine()) != null) {
+					line = pattern.matcher(line).replaceAll(ELEMENT_REF_REPLACE);
+					writer.write(line);
+					writer.newLine();
+				}
+				reader.close();
+				writer.close();
+				
+			}
+			
+			// END ADDED
+			
 			packageName = JAXBUtils.namespaceURIToPackage(icatBaseUrl);
 			File file = org.apache.cxf.tools.util.JAXBUtils.getPackageMappingSchemaBindingFile(ICATPROJECT_NAMESPACE, packageName);
 			List<String> bindings = new LinkedList<>();
 			bindings.add(file.toURI().toString());
 			
-			client = JaxWsDynamicClientFactory.newInstance().createClient(icatUrl, qName, bindings);
-//			serviceInfo = client.getEndpoint().getService().getServiceInfos().get(0);
+			client = JaxWsDynamicClientFactory.newInstance().createClient(modifiedWSDL.toURI().toURL(), qName, bindings);
+
 			final Object[] response = client.invoke("getApiVersion", (Object) null);
 			LOG.debug("ICAT Version: "+ response[0].toString());
 		} catch (Exception e) {
 			LOG.error("Unable to initialise dynamic client", e);
 			throw new IllegalStateException("Unable to initialise DynamicSimpleICATClient", e);
+		} finally {
+			close(urlStream);
+			close(reader);
+			close(writer);
+		}
+	}
+
+	private void close(final Closeable closeable) {
+		if(null != closeable) {
+			try {
+				closeable.close();
+			} catch (IOException e) {
+				LOG.warn("Error closing Closeable " + closeable.toString(), e);
+			}
 		}
 	}
 

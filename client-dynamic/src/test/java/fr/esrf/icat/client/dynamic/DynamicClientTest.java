@@ -51,6 +51,16 @@ public class DynamicClientTest {
 		
 	}
 	
+	@Test
+	public void testUpdateDatafile() throws Exception {
+		final WrappedEntityBean bean = client.get("Datafile INCLUDE 1", 818);
+		
+		bean.set("description", "test");
+		
+		client.update(bean);
+		
+	}
+
 	public static void main(String[] args) throws Exception {
 		DynamicClientTest me = new DynamicClientTest();
 		me.setUp();

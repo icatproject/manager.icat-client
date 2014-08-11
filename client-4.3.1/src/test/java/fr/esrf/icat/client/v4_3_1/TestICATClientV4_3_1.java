@@ -42,6 +42,7 @@ import fr.esrf.icat.client.ICATClientException;
 import fr.esrf.icat.client.UserDTO;
 import fr.esrf.icat.client.data.DatafileDTOImpl;
 import fr.esrf.icat.client.data.UserDTOImpl;
+import fr.esrf.icat.client.wrapper.WrappedEntityBean;
 
 public class TestICATClientV4_3_1 {
 
@@ -185,6 +186,16 @@ public class TestICATClientV4_3_1 {
 			client.deleteEntities(ICATClientImpl.ENTITY_INVESTIGATION, idi); // cascade to dataset
 		}
 
+	}
+	
+	@Test
+	public void testUpdateDatafile() throws Exception {
+		final WrappedEntityBean bean = client.get("Datafile INCLUDE 1", 818);
+		
+		bean.set("description", "test");
+		
+		client.update(bean);
+		
 	}
 
 }
