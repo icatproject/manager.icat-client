@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -21,7 +22,6 @@ import javax.xml.namespace.QName;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.common.jaxb.JAXBUtils;
 import org.apache.cxf.endpoint.Client;
-import org.apache.cxf.jaxws.endpoint.dynamic.JaxWsDynamicClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,11 @@ import fr.esrf.icat.client.wrapper.WrappedEntityBean;
 
 public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 
+	private static final String MINIMUM_SUPPORTED_VERSION = "4.2";
+
 	private final static Logger LOG = LoggerFactory.getLogger(DynamicSimpleICATClient.class);
+
+	private static final String DOT_SPLIT_PATTERN = "\\.";
 
 	private static final String QUOTE = "\"";
 
@@ -48,9 +52,16 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 	private String sessionId;
 
 	private String packageName;
+
+	private String version_string;
+	
+	private List<String> fileNameList;
+	
+	private List<String> entityList;
 	
 	public DynamicSimpleICATClient() {
 		super();
+		entityList = null;
 	}
 
 	@Override
@@ -132,10 +143,17 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 			List<String> bindings = new LinkedList<>();
 			bindings.add(file.toURI().toString());
 			
-			client = JaxWsDynamicClientFactory.newInstance().createClient(modifiedWSDL.toURI().toURL(), qName, bindings);
+			final ModifiedDynamicClientFactory clientFactory = ModifiedDynamicClientFactory.newInstance();
+			client = clientFactory.createClient(modifiedWSDL.toURI().toURL(), qName, bindings);
+			fileNameList = clientFactory.getClassNameList();
 
-			final Object[] response = client.invoke("getApiVersion", (Object) null);
-			LOG.debug("ICAT Version: "+ response[0].toString());
+			version_string = client.invoke("getApiVersion", (Object) null)[0].toString();
+			LOG.debug("ICAT Version: "+ version_string);
+			
+			if(!isVersionAbove(MINIMUM_SUPPORTED_VERSION)) {
+				throw new IllegalStateException("Minimum supported version is " + MINIMUM_SUPPORTED_VERSION);
+			}
+			
 		} catch (Exception e) {
 			LOG.error("Unable to initialise dynamic client", e);
 			throw new IllegalStateException("Unable to initialise DynamicSimpleICATClient", e);
@@ -203,13 +221,18 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 	
 	@Override
 	public long refreshConnection() throws ICATClientException {
-		try {
-			client.invoke("refresh", sessionId);
-			long remainingMinutes = (long) Math.floor((double) client.invoke("getRemainingMinutes", sessionId)[0]);
-			return System.currentTimeMillis() + remainingMinutes * ONE_MINUTE_IN_MS;
-		} catch (Exception e) {
-			LOG.error("Unable to refresh connection", e);
-			throw new ICATClientException(e);
+		if (isVersionAbove("4.3")) {
+			try {
+				client.invoke("refresh", sessionId);
+				long remainingMinutes = (long) Math.floor((double) client.invoke("getRemainingMinutes", sessionId)[0]);
+				return System.currentTimeMillis() + remainingMinutes * ONE_MINUTE_IN_MS;
+			} catch (Exception e) {
+				LOG.error("Unable to refresh connection", e);
+				throw new ICATClientException(e);
+			}
+		} else {
+			LOG.info("ICAT version lower than 4.3, will create new connection instead of refreshing it");
+			return initiateConnection();
 		}
 	}
 
@@ -313,12 +336,20 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> getEntityNames() throws ICATClientException {
-		checkConnection();
-		try {
-			return (List<String>) client.invoke("getEntityNames", sessionId)[0];
-		} catch (Exception e) {
-			throw new ICATClientException(e);
+		if(null == entityList) {
+			try {
+				if (isVersionAbove("4.3")) {
+					checkConnection();
+					entityList = (List<String>) client.invoke("getEntityNames", sessionId)[0];
+				} else {
+					LOG.info("ICAT version lower than 4.3, will use compatibility getEntityNames");
+					entityList = createEntityNames();
+				}
+			} catch (Exception e) {
+				throw new ICATClientException(e);
+			}
 		}
+		return entityList;
 	}
 
 	@Override
@@ -333,12 +364,44 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 
 	@Override
 	public String getServerVersion() throws ICATClientException {
-		checkConnection();
-		try {
-			return client.invoke("getApiVersion", sessionId)[0].toString();
-		} catch (Exception e) {
-			throw new ICATClientException(e);
+		return version_string;
+	}
+	
+	private boolean isVersionAbove(String version) {
+		return compareVersionTo(version) >= 0;
+	}
+
+	// adapted from http://stackoverflow.com/questions/6701948/efficient-way-to-compare-version-strings-in-java?lq=1
+	// protected for testing purpose
+	protected final int compareVersionTo(String otherVersion) {
+	    final String[] vals1 = version_string.split(DOT_SPLIT_PATTERN);
+	    final String[] vals2 = otherVersion.split(DOT_SPLIT_PATTERN);
+	    int i = 0;
+	    // set index to first non-equal ordinal or length of shortest version string
+	    while (i < vals1.length && i < vals2.length && vals1[i].equals(vals2[i])) {
+	      i++;
+	    }
+	    // compare first non-equal ordinal number
+	    if (i < vals1.length && i < vals2.length) {
+	        return Integer.signum(Integer.valueOf(vals1[i]).compareTo(Integer.valueOf(vals2[i])));
+	    }
+	    // the strings are equal or one string is a substring of the other
+	    // e.g. "1.2.3" = "1.2.3" or "1.2.3" < "1.2.3.4"
+        return Integer.signum(vals1.length - vals2.length);
+	}
+
+	protected final List<String> createEntityNames() throws ClassNotFoundException {
+		if(null == fileNameList) return null;
+		final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+		final Class<?> entityClass = contextClassLoader.loadClass(packageName + ".EntityBaseBean");
+		final List<String> rep = new LinkedList<>();
+		for(String name : fileNameList) {
+			Class<?> clazz = contextClassLoader.loadClass(packageName + "." + name);
+			if(entityClass.isAssignableFrom(clazz) && !Modifier.isAbstract(clazz.getModifiers())) {
+				rep.add(name);
+			}
 		}
+		return rep;
 	}
 
 }
