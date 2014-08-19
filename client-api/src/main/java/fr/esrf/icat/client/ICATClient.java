@@ -29,6 +29,19 @@ import java.util.List;
 
 public interface ICATClient extends SimpleICATClient {
 
+	/**
+	 * Name of dataset entity. Should not change.
+	 */
+	public static final String ENTITY_DATASET = "Dataset";
+	/**
+	 * Name of investigation entity. Should not change.
+	 */
+	public static final String ENTITY_INVESTIGATION = "Investigation";
+	/**
+	 * Name of user entity. Should not change.
+	 */
+	public static final String ENTITY_USER = "User";
+
 	public abstract boolean investigationExists(String investigation, String visit) throws ICATClientException;
 
 	public abstract long createInvestigation(String name, String type, String visit, String title, String instrument, GregorianCalendar startDate) throws ICATClientException;

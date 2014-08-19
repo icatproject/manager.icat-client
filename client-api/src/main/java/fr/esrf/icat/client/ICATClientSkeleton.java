@@ -29,21 +29,6 @@ import java.util.List;
 
 public abstract class ICATClientSkeleton extends SimpleICATClientSkeleton implements ICATClient {
 
-	/**
-	 * Name of dataset entity. Should not change.
-	 */
-	public static final String ENTITY_DATASET = "Dataset";
-
-	/**
-	 * Name of investigation entity. Should not change.
-	 */
-	public static final String ENTITY_INVESTIGATION = "Investigation";
-
-	/**
-	 * Name of user entity. Should not change.
-	 */
-	public static final String ENTITY_USER = "User";
-
 	public ICATClientSkeleton() {
 		super();
 	}
