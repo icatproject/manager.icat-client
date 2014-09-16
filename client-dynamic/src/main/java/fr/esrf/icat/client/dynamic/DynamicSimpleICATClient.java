@@ -92,6 +92,11 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 		InputStream urlStream = null;
 		BufferedReader reader = null;
 		BufferedWriter writer = null;
+		
+		if (!ModifiedDynamicClientFactory.isCompilerAvailable()) {
+			throw new IllegalStateException("This program needs a JDK to run !\nPlease see the README.txt file for how to configure it.");
+		}
+		
 		try {
 			final String icatBaseUrl = getIcatBaseUrl();
 			URL icatUrl = new URL(new URL(icatBaseUrl), ICAT_SERVICE_URL);

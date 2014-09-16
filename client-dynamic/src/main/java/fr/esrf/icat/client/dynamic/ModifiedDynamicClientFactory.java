@@ -27,8 +27,11 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.tools.ToolProvider;
+
 import org.apache.cxf.Bus;
 import org.apache.cxf.bus.CXFBusFactory;
+import org.apache.cxf.common.util.Compiler;
 import org.apache.cxf.jaxws.endpoint.dynamic.JaxWsDynamicClientFactory;
 
 public class ModifiedDynamicClientFactory extends JaxWsDynamicClientFactory {
@@ -69,6 +72,10 @@ public class ModifiedDynamicClientFactory extends JaxWsDynamicClientFactory {
 			classNameList.add(name.substring(0, name.lastIndexOf('.')));
 		}
 		return super.compileJavaSrc(classPath, srcList, dest);
+	}
+	
+	public static boolean isCompilerAvailable() {
+		return Boolean.getBoolean(Compiler.class.getName() + "-fork") || (null != ToolProvider.getSystemJavaCompiler());
 	}
 
 	public List<String> getClassNameList() {
