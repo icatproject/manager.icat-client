@@ -38,7 +38,7 @@ public class ModifiedDynamicClientFactory extends JaxWsDynamicClientFactory {
 
 	private List<String> classNameList;
 	
-	protected ModifiedDynamicClientFactory(Bus bus) {
+	protected ModifiedDynamicClientFactory(final Bus bus) {
 		super(bus);
 	}
 	
@@ -49,7 +49,7 @@ public class ModifiedDynamicClientFactory extends JaxWsDynamicClientFactory {
      *            instance
      * @return the new instance
      */
-    public static ModifiedDynamicClientFactory newInstance(Bus b) {
+    public static ModifiedDynamicClientFactory newInstance(final Bus b) {
         return new ModifiedDynamicClientFactory(b);
     }
 
@@ -65,7 +65,7 @@ public class ModifiedDynamicClientFactory extends JaxWsDynamicClientFactory {
     }
 
 	@Override
-	protected boolean compileJavaSrc(String classPath, List<File> srcList, String dest) {
+	protected boolean compileJavaSrc(final String classPath, final List<File> srcList, final String dest) {
 		classNameList = new LinkedList<>();
 		for(File sf : srcList) {
 			final String name = sf.getName();

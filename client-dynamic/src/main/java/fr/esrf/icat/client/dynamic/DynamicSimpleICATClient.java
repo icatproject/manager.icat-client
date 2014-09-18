@@ -279,7 +279,7 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 	}
 
 	@Override
-	public void deleteEntities(String entityName, Long... ids) throws ICATClientException {
+	public void deleteEntities(final String entityName, final Long... ids) throws ICATClientException {
 		if(null == ids || ids.length == 0) {
 			return;
 		}
@@ -307,7 +307,7 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 	}
 
 	@Override
-	public WrappedEntityBean get(String entity, long id) throws ICATClientException {
+	public WrappedEntityBean get(final String entity, final long id) throws ICATClientException {
 		checkConnection();
 		try {
 			return new WrappedEntityBean(client.invoke("get", sessionId, entity, id)[0]);
@@ -317,7 +317,7 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 	}
 
 	@Override
-	public List<WrappedEntityBean> search(String query) throws ICATClientException {
+	public List<WrappedEntityBean> search(final String query) throws ICATClientException {
 		checkConnection();
 		try {
 			List<?> l = (List<?>) client.invoke("search", sessionId, query)[0];
@@ -332,7 +332,7 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 	}
 
 	@Override
-	public void update(WrappedEntityBean bean) throws ICATClientException {
+	public void update(final WrappedEntityBean bean) throws ICATClientException {
 		checkConnection();
 		try {
 			client.invoke("update", sessionId, bean.getWrapped());
@@ -342,7 +342,7 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 	}
 
 	@Override
-	public WrappedEntityBean create(String entity) throws ICATClientException {
+	public WrappedEntityBean create(final String entity) throws ICATClientException {
 		try {
 			return new WrappedEntityBean(Thread.currentThread().getContextClassLoader()
 					.loadClass(packageName + "." + StringUtils.capitalize(entity)).newInstance());
@@ -352,7 +352,7 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 	}
 
 	@Override
-	public long create(WrappedEntityBean bean) throws ICATClientException {
+	public long create(final WrappedEntityBean bean) throws ICATClientException {
 		checkConnection();
 		try {
 			return (long) client.invoke("create", sessionId, bean.getWrapped())[0];
@@ -381,7 +381,7 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 	}
 
 	@Override
-	public void delete(WrappedEntityBean bean) throws ICATClientException {
+	public void delete(final WrappedEntityBean bean) throws ICATClientException {
 		checkConnection();
 		try {
 			client.invoke("delete", sessionId, bean.getWrapped());
@@ -395,13 +395,13 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 		return version_string;
 	}
 	
-	private boolean isVersionAbove(String version) {
+	private boolean isVersionAbove(final String version) {
 		return compareVersionTo(version) >= 0;
 	}
 
 	// adapted from http://stackoverflow.com/questions/6701948/efficient-way-to-compare-version-strings-in-java?lq=1
 	// protected for testing purpose
-	protected final int compareVersionTo(String otherVersion) {
+	protected final int compareVersionTo(final String otherVersion) {
 	    final String[] vals1 = version_string.split(DOT_SPLIT_PATTERN);
 	    final String[] vals2 = otherVersion.split(DOT_SPLIT_PATTERN);
 	    int i = 0;
