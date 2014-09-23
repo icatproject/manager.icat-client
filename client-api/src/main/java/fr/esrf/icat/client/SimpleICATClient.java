@@ -96,6 +96,8 @@ public interface SimpleICATClient {
 	
 	public abstract void delete(WrappedEntityBean bean) throws ICATClientException;
 	
+	public abstract void delete(List<WrappedEntityBean> beans) throws ICATClientException;
+
 	public abstract String getServerVersion() throws ICATClientException;
 
 }

@@ -180,4 +180,10 @@ public class DelegatedICATClient extends ICATClientSkeleton {
 		return delegate.getServerVersion();
 	}
 
+	@Override
+	public void delete(final List<WrappedEntityBean> beans) throws ICATClientException {
+		delegate.delete(beans);
+		
+	}
+
 }

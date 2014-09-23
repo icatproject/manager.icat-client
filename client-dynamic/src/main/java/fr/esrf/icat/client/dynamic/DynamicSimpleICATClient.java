@@ -432,4 +432,18 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 		return rep;
 	}
 
+	@Override
+	public void delete(final List<WrappedEntityBean> beans) throws ICATClientException {
+		try {
+			checkConnection();
+			List<Object> raw = new LinkedList<Object>();
+			for(WrappedEntityBean bean : beans) {
+				raw.add(bean.getWrapped());
+			}
+			client.invoke("deleteMany", sessionId, raw);  
+		} catch (Exception e) {
+			throw new ICATClientException(e);
+		}
+	}
+
 }
