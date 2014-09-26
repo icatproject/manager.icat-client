@@ -467,7 +467,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			// check it is not null
 			if(null == type) {
 				LOG.error("Parameter type '" + parameter + "' not defined");
-				throw new ICATClientException("Parameter type does not exist: " + type);
+				throw new ICATClientException("Parameter type does not exist: " + parameter);
 			}
 			DatasetParameter dtsparam = new DatasetParameter();
 			dtsparam.setDataset(dts);
@@ -501,7 +501,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 				// check it is not null
 				if(null == type) {
 					LOG.error("Parameter type '" + parameter + "' not defined");
-					throw new ICATClientException("Parameter type does not exist: " + type);
+					throw new ICATClientException("Parameter type does not exist: " + parameter);
 				}
 				DatasetParameter dtsparam = new DatasetParameter();
 				dtsparam.setDataset(dts);

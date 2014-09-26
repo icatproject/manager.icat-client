@@ -67,7 +67,7 @@ public class WrapperTest {
 	}
 
 	@Test
-	public void BasicReflectionTest() throws Exception {
+	public void basicReflectionTest() throws Exception {
 		Object o = client.getRaw("Instrument", 393);
 		
 		System.out.println("--- Methods ---");		
