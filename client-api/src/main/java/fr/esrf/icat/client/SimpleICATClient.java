@@ -31,7 +31,7 @@ public interface SimpleICATClient {
 
 	public static final String ICAT_SERVICE_NAME = "ICATService";
 	public static final String ICATPROJECT_NAMESPACE = "http://icatproject.org";
-	public static final String ICAT_SERVICE_URL = "/ICATService/ICAT?wsdl";
+	public static final String ICAT_SERVICE_URL = "ICATService/ICAT?wsdl";
 
 	public abstract String getIcatBaseUrl();
 
