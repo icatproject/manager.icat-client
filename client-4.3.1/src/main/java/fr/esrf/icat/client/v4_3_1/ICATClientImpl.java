@@ -73,6 +73,8 @@ import fr.esrf.icat.client.wrapper.WrappedEntityBean;
 
 public class ICATClientImpl extends ICATClientSkeleton {
 
+	private static final String PARAMETER_ERROR_STRING = "ERROR";
+
 	private final static Logger LOG = LoggerFactory.getLogger(ICATClient.class);
 	
 	private ICAT icat;
@@ -474,7 +476,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			dtsparam.setType(type);
 			ParameterValueType valueType = type.getValueType();
 			if(valueType.equals(ParameterValueType.NUMERIC)) {
-				Double dvalue = Double.parseDouble(value);
+				Double dvalue = PARAMETER_ERROR_STRING.equals(value) ? Double.NaN : Double.parseDouble(value);
 				dtsparam.setNumericValue(dvalue);
 			} else {
 				dtsparam.setStringValue(value);
