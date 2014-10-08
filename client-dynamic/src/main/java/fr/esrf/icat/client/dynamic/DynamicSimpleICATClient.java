@@ -183,7 +183,7 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 			}
 			
 		} catch (Exception e) {
-			LOG.error("Unable to initialise dynamic client", e);
+			LOG.error("Unable to initialise dynamic client:" + e.getMessage());
 			throw new IllegalStateException("Unable to initialise DynamicSimpleICATClient", e);
 		} finally {
 			close(urlStream);
@@ -242,7 +242,7 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 			return System.currentTimeMillis() + remainingMinutes * ONE_MINUTE_IN_MS;
 
 		} catch (Exception e) {
-			LOG.error("Unable to create connection", e);
+			LOG.error("Unable to create connection:" + e.getMessage());
 			throw new ICATClientException(e);
 		}
 	}
@@ -255,7 +255,7 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 				long remainingMinutes = (long) Math.floor((double) client.invoke("getRemainingMinutes", sessionId)[0]);
 				return System.currentTimeMillis() + remainingMinutes * ONE_MINUTE_IN_MS;
 			} catch (Exception e) {
-				LOG.error("Unable to refresh connection", e);
+				LOG.error("Unable to refresh connection:" + e.getMessage());
 				throw new ICATClientException(e);
 			}
 		} else {
