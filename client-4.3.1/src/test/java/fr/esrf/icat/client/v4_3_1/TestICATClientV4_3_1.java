@@ -134,6 +134,7 @@ public class TestICATClientV4_3_1 {
 		
 		client.createDatasetParameter(idd, "machineMode", "dummy value");
 		client.createDatasetParameter(idd, "energy", Double.toString(25.0));
+		client.createDatasetParameter(idd, "motor_mi_h", "ERROR");
 		
 		try {
 			client.createDatasetParameter(idd, "dummy param", "value");
