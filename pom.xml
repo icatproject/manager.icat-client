@@ -29,17 +29,6 @@
     <module>client-dynamic</module>
   </modules>
  
-  <repositories>
-	<repository>
-		<id>icat</id>
-		<name>ICAT Repository</name>
-		<url>http://www.icatproject.org/mvn/repo</url>
-		<snapshots>
-			<enabled>false</enabled>
-		</snapshots>
-	</repository>
-  </repositories>
-
   <dependencyManagement>
   	<dependencies>
   		<dependency>
