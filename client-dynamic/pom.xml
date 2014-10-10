@@ -12,6 +12,15 @@
   <name>Dynamic ICAT client</name>
   <description>Implementation of the Simple ICAT client API using CXF dynamic client</description>
 
+	<licenses>
+	  <license>
+	    <name>The Apache Software License, Version 2.0</name>
+	    <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+	    <distribution>repo</distribution>
+	    <comments>A business-friendly OSS license</comments>
+	  </license>
+	</licenses>
+
   <dependencies>
 	<dependency>
 		<groupId>fr.esrf.icat</groupId>
@@ -50,7 +59,7 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
         <configuration>
-          <licenseName>gpl_v3</licenseName>
+          <licenseName>apache_v2</licenseName>
         </configuration>
         <executions>
           <execution>
