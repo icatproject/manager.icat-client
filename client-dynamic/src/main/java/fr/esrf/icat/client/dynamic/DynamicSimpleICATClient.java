@@ -47,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.esrf.icat.client.ICATClientException;
+import fr.esrf.icat.client.ICATUtil;
 import fr.esrf.icat.client.SimpleICATClientSkeleton;
 import fr.esrf.icat.client.wrapper.WrappedEntityBean;
 
@@ -55,8 +56,6 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 	private static final String MINIMUM_SUPPORTED_VERSION = "4.2";
 
 	private final static Logger LOG = LoggerFactory.getLogger(DynamicSimpleICATClient.class);
-
-	private static final String DOT_SPLIT_PATTERN = "\\.";
 
 	private static final String QUOTE = "\"";
 
@@ -400,20 +399,7 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 	// adapted from http://stackoverflow.com/questions/6701948/efficient-way-to-compare-version-strings-in-java?lq=1
 	// protected for testing purpose
 	protected final int compareVersionTo(final String otherVersion) {
-	    final String[] vals1 = version_string.split(DOT_SPLIT_PATTERN);
-	    final String[] vals2 = otherVersion.split(DOT_SPLIT_PATTERN);
-	    int i = 0;
-	    // set index to first non-equal ordinal or length of shortest version string
-	    while (i < vals1.length && i < vals2.length && vals1[i].equals(vals2[i])) {
-	      i++;
-	    }
-	    // compare first non-equal ordinal number
-	    if (i < vals1.length && i < vals2.length) {
-	        return Integer.signum(Integer.valueOf(vals1[i]).compareTo(Integer.valueOf(vals2[i])));
-	    }
-	    // the strings are equal or one string is a substring of the other
-	    // e.g. "1.2.3" = "1.2.3" or "1.2.3" < "1.2.3.4"
-        return Integer.signum(vals1.length - vals2.length);
+		return ICATUtil.compareVersion(version_string, otherVersion);
 	}
 
 	protected final List<String> createEntityNames() throws ClassNotFoundException {
