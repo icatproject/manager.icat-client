@@ -62,7 +62,15 @@ public abstract class ICATClientSkeleton extends SimpleICATClientSkeleton implem
 	 * @see fr.esrf.icat.client.ICATClient#createDataset(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.GregorianCalendar, java.util.GregorianCalendar, java.lang.String)
 	 */
 	@Override
-	public abstract long createDataset(String investigation, String instrument, String sampleName, String name, String location, GregorianCalendar startDate, GregorianCalendar endDate, String comment) throws ICATClientException;
+	public long createDataset(String investigation, String instrument, String sampleName, String name, String location, GregorianCalendar startDate, GregorianCalendar endDate, String comment) throws ICATClientException {
+		return createDataset(investigation, instrument, sampleName, name, location, startDate, endDate, comment, true);
+	}
+
+	/* (non-Javadoc)
+	 * @see fr.esrf.icat.client.ICATClient#createDataset(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.GregorianCalendar, java.util.GregorianCalendar, java.lang.String)
+	 */
+	@Override
+	public abstract long createDataset(String investigation, String instrument, String sampleName, String name, String location, GregorianCalendar startDate, GregorianCalendar endDate, String comment, boolean complete) throws ICATClientException;
 
 	/* (non-Javadoc)
 	 * @see fr.esrf.icat.client.ICATClient#createDatafile(long, java.lang.String, java.lang.String, java.lang.String, long)

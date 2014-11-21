@@ -317,7 +317,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 	}
 
 	@Override
-	public long createDataset(final String investigation, final String visit, final String sampleName, final String name, final String location, final GregorianCalendar startDate, final GregorianCalendar endDate, final String comment) throws ICATClientException {
+	public long createDataset(final String investigation, final String visit, final String sampleName, final String name, final String location, final GregorianCalendar startDate, final GregorianCalendar endDate, final String comment, final boolean complete) throws ICATClientException {
 		try {
 			checkConnection();
 			// retrieve the investigation
@@ -356,7 +356,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 				dataset.setSample(sample);
 			}
 			// set complete and create
-			dataset.setComplete(true);
+			dataset.setComplete(complete);
 			long dts_id = create(dataset);
 			// update investigation end date if needed
 			XMLGregorianCalendar invEndDate = inv.getEndDate();

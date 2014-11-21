@@ -58,6 +58,8 @@ public interface ICATClient extends SimpleICATClient {
 
 	public abstract long createDataset(String investigation, String instrument, String sampleName, String name, String location, GregorianCalendar startDate, GregorianCalendar endDate, String comment) throws ICATClientException;
 
+	public abstract long createDataset(String investigation, String instrument, String sampleName, String name, String location, GregorianCalendar startDate, GregorianCalendar endDate, String comment, boolean complete) throws ICATClientException;
+
 	public abstract long createDatafile(long datasetID, String filename, String location, String format, long size) throws ICATClientException;
 
 	public abstract long createDatafile(long datasetID, DatafileDTO datafileData) throws ICATClientException;

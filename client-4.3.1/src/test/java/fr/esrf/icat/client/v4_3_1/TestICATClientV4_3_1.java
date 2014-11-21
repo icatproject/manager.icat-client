@@ -122,8 +122,25 @@ public class TestICATClientV4_3_1 {
 			// pass
 		}
 		
+		// by default dataset should be complete
+		Dataset d = (Dataset) client.get("Dataset", idd).getWrapped();
+		assertTrue("Dataset should be complete by default", d.isComplete());
+		
 		client.deleteEntities(ICATClientImpl.ENTITY_INVESTIGATION, idi); // cascade to dataset
 	}
+	
+	@Test
+	public void testIncompleteDataset() throws ICATClientException {
+		long idi = client.createInvestigation("dummyInvestigation", "MA", "dummyVisit", "dummy title", "ID19", new GregorianCalendar());
+		long idd = client.createDataset("dummyInvestigation", "dummyVisit", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar(), null, false);
+		
+		assertTrue("Incorrect id", idd > 0);
+
+		Dataset d = (Dataset) client.get("Dataset", idd).getWrapped();
+		assertFalse("Dataset should be incomplete", d.isComplete());
+		
+		client.deleteEntities(ICATClientImpl.ENTITY_INVESTIGATION, idi); // cascade to dataset
+	}	
 	
 	@Test
 	public void testDatasetParameter() throws ICATClientException {
