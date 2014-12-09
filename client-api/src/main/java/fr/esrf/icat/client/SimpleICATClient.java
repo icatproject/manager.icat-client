@@ -21,6 +21,7 @@ package fr.esrf.icat.client;
  */
 
 
+import java.io.IOException;
 import java.util.List;
 
 import fr.esrf.icat.client.wrapper.WrappedEntityBean;
@@ -56,7 +57,7 @@ public interface SimpleICATClient {
 	 */
 	public abstract void checkConnection() throws ICATClientException;
 
-	public abstract void init() throws ICATClientException;
+	public abstract void init() throws ICATClientException, IOException;
 
 	public abstract void stop();
 

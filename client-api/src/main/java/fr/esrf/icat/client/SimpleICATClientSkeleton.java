@@ -21,6 +21,7 @@ package fr.esrf.icat.client;
  */
 
 
+import java.io.IOException;
 import java.util.List;
 
 import fr.esrf.icat.client.wrapper.WrappedEntityBean;
@@ -111,7 +112,7 @@ public abstract class SimpleICATClientSkeleton implements SimpleICATClient {
 	 * @see fr.esrf.icat.client.ICATClient#init()
 	 */
 	@Override
-	public void init() throws ICATClientException {
+	public void init() throws ICATClientException, IOException {
 		doInit();
 		expiringTime = initiateConnection();
 		populateObjectCache();
@@ -120,7 +121,7 @@ public abstract class SimpleICATClientSkeleton implements SimpleICATClient {
 	/**
 	 * Init method for implementors. After this method is called the client has to be able to connect to ICAT.
 	 */
-	public void doInit() {
+	public void doInit() throws ICATClientException, IOException {
 	}
 
 	/* (non-Javadoc)

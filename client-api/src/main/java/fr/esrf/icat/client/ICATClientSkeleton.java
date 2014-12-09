@@ -27,10 +27,6 @@ import java.util.List;
 
 public abstract class ICATClientSkeleton extends SimpleICATClientSkeleton implements ICATClient {
 
-	public ICATClientSkeleton() {
-		super();
-	}
-
 	@Override
 	public abstract void populateObjectCache() throws ICATClientException;
 

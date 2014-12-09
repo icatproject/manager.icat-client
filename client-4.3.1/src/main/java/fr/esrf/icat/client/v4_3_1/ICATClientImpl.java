@@ -21,7 +21,7 @@ package fr.esrf.icat.client.v4_3_1;
  */
 
 
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.GregorianCalendar;
@@ -35,6 +35,7 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.icatproject_4_3_1.Datafile;
@@ -67,6 +68,8 @@ import fr.esrf.icat.client.ICATClient;
 import fr.esrf.icat.client.ICATClientException;
 import fr.esrf.icat.client.ICATClientSkeleton;
 import fr.esrf.icat.client.UserDTO;
+import fr.esrf.icat.client.exception.ICATDataException;
+import fr.esrf.icat.client.exception.ICATSessionException;
 import fr.esrf.icat.client.wrapper.WrappedEntityBean;
 
 public class ICATClientImpl extends ICATClientSkeleton {
@@ -94,21 +97,34 @@ public class ICATClientImpl extends ICATClientSkeleton {
 	private DatatypeFactory datatypeFactory;
 
 	@Override
-	public void doInit() {
+	public void doInit() throws ICATClientException, IOException {
+		// this should never happen, if it does it throws a RuntimeException
 		try {
 			datatypeFactory = DatatypeFactory.newInstance();
-			URL base = new URL(getIcatBaseUrl());
-			URL icatUrl = new URL(base, ICAT_SERVICE_URL);
-			LOG.debug("Using ICAT service at " + icatUrl.toString());
+		} catch (DatatypeConfigurationException e) {
+			throw new IllegalStateException("Unable to initialise ICATClient v4.3.1 due to error in DatatypeFactory", e);
+		}
+		// construct ICAT URL
+		URL base = new URL(getIcatBaseUrl());
+		URL icatUrl = new URL(base, ICAT_SERVICE_URL);
+		LOG.debug("Using ICAT service at {}", icatUrl.toString());
+		// web service initialisation
+		// throws a WebServiceException if the wsdl URL is wrong
+		// catch and throw a ConnectException instead
+		try {
 			QName qName = new QName(ICATPROJECT_NAMESPACE, ICAT_SERVICE_NAME);
 			ICATService service = new ICATService(icatUrl, qName);
 			icat = service.getICATPort();
-			if(LOG.isDebugEnabled()) {
-				LOG.debug("ICAT Version: "+ icat.getApiVersion());
-			}
-		} catch (IcatException_Exception | DatatypeConfigurationException | MalformedURLException e) {
-			throw new IllegalStateException("Unable to initialise ICATClient v4.3.1", e);
+		} catch (WebServiceException e) {
+			throw new IOException("Unable to create ICAT service", e);
 		}
+		
+		try {
+			LOG.debug("ICAT Version: {}", icat.getApiVersion());
+		} catch (IcatException_Exception e) {
+			throw new ICATClientException("Error accessing ICAT API version", e);
+		}
+				
 	}
 
 	@Override
@@ -133,8 +149,8 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			long remainingMinutes = (long) Math.floor(icat.getRemainingMinutes(sessionId));
 			return System.currentTimeMillis() + remainingMinutes * ONE_MINUTE_IN_MS;
 		} catch (IcatException_Exception e1) {
-			LOG.error("Unable to create connection:" + e1.getMessage());
-			throw new ICATClientException(e1);
+			LOG.error("Unable to create connection: " + e1.getMessage());
+			throw new ICATSessionException(e1);
 		}
 	}
 
@@ -146,7 +162,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			return System.currentTimeMillis() + remainingMinutes * ONE_MINUTE_IN_MS;
 		} catch (IcatException_Exception e) {
 			LOG.error("Unable to refresh connection:" + e.getMessage());
-			throw new ICATClientException(e);
+			throw new ICATSessionException(e);
 		}
 	}
 
@@ -204,7 +220,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			}
 
 		} catch (IcatException_Exception e) {
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 
@@ -220,7 +236,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			return null != response && response.size() == 1;
 		} catch (IcatException_Exception e) {
 			LOG.error("Unable to check investigation " + investigation + ": " + e.getMessage());
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 
@@ -245,7 +261,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			return icatInvestigation.getId();
 		} catch (IcatException_Exception e) {
 			LOG.error("Unable to create investigation [" + name + ", " + type + ", " + visit + ", " + title + "]:" + e.getMessage());
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 
@@ -258,13 +274,13 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			if (null == inv) {
 				String message = "Investigation " + name + "[" + visit + "] not found";
 				LOG.error(message);
-				throw new ICATClientException(message);
+				throw new ICATDataException(message);
 			}
 			inv.setSummary(description);
 			update(inv);
 		} catch (IcatException_Exception e) {
 			LOG.error("Unable to update investigation [" + name + ", " + visit + "]:" + e.getMessage());
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 
@@ -277,7 +293,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			if (null == inv) {
 				String message = "Investigation " + name + "[" + visit + "] not found";
 				LOG.error(message);
-				throw new ICATClientException(message);
+				throw new ICATDataException(message);
 			}
 			// make sure each user exist
 			// users need to be created one by one so that the create method sets their id
@@ -312,7 +328,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			return newUserIds;
 		} catch (IcatException_Exception e) {
 			LOG.error("Unable to add user to investigation [" + name + ", " + visit + "]:" + e.getMessage());
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 
@@ -325,7 +341,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			if (null == inv) {
 				String message = "Investigation " + investigation + "[" + visit + "] not found";
 				LOG.error(message);
-				throw new ICATClientException(message);
+				throw new ICATDataException(message);
 			}
 			// retrieve or create the sample
 			Sample sample = null;
@@ -367,7 +383,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			return dts_id;
 		} catch (IcatException_Exception e) {
 			LOG.error("Unable to create dataset [" + investigation + ", " + visit + ", " + name + ", " + location + "]:" + e.getMessage());
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 
@@ -424,7 +440,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			return create(dtf);
 		} catch (IcatException_Exception e) {
 			LOG.error("Unable to create datafile [" + datasetID + ", " + filename + ", " + location+ ", " + format + "]:" + e.getMessage());
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 	
@@ -452,7 +468,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			icat.createMany(sessionId, dtfCollection);
 		} catch (IcatException_Exception e) {
 			LOG.error("Unable to create datafiles for dataset [" + datasetID + "]:" + e.getMessage());
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 
@@ -467,7 +483,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			// check it is not null
 			if(null == type) {
 				LOG.error("Parameter type '" + parameter + "' not defined");
-				throw new ICATClientException("Parameter type does not exist: " + parameter);
+				throw new ICATDataException("Parameter type does not exist: " + parameter);
 			}
 			DatasetParameter dtsparam = new DatasetParameter();
 			dtsparam.setDataset(dts);
@@ -482,7 +498,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			return create(dtsparam);
 		} catch (IcatException_Exception e) {
 			LOG.error("Unable to create dataset parameter [" + datasetID + ", " + parameter + ", " + value + "]:" + e.getMessage());
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 
@@ -501,7 +517,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 				// check it is not null
 				if(null == type) {
 					LOG.error("Parameter type '" + parameter + "' not defined");
-					throw new ICATClientException("Parameter type does not exist: " + parameter);
+					throw new ICATDataException("Parameter type does not exist: " + parameter);
 				}
 				DatasetParameter dtsparam = new DatasetParameter();
 				dtsparam.setDataset(dts);
@@ -520,7 +536,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			icat.createMany(sessionId, dtspCollection);
 		} catch (IcatException_Exception e) {
 			LOG.error("Unable to create dataset parameters for dataset [" + datasetID + "]:" + e.getMessage());
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 
@@ -622,7 +638,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			List<? extends Object> result = icat.search(sessionId, query.toString());
 			icat.deleteMany(sessionId, (List<EntityBaseBean>) result);
 		} catch (IcatException_Exception e) {
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 
@@ -645,7 +661,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			checkConnection();
 			return new WrappedEntityBean(getRaw(entity, i));
 		} catch (IcatException_Exception e) {
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 	
@@ -664,7 +680,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			}
 			return retL;
 		} catch (IcatException_Exception e) {
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 
@@ -674,7 +690,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			checkConnection();
 			update((EntityBaseBean) bean.getWrapped());
 		} catch (IcatException_Exception e) {
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 
@@ -683,7 +699,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 		try {
 			return new WrappedEntityBean(Class.forName("org.icatproject_4_3_1." + StringUtils.capitalize(entity)).newInstance());
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 
@@ -693,7 +709,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			checkConnection();
 			return create((EntityBaseBean) bean.getWrapped());
 		} catch (IcatException_Exception e) {
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 
@@ -703,7 +719,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 		try {
 			return icat.getEntityNames();
 		} catch (IcatException_Exception e) {
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 
@@ -713,7 +729,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 		try {
 			icat.delete(sessionId, (EntityBaseBean) bean.getWrapped());
 		} catch (IcatException_Exception e) {
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 
@@ -723,7 +739,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 		try {
 			return icat.getApiVersion();
 		} catch (IcatException_Exception e) {
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 
@@ -737,7 +753,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			}
 			icat.deleteMany(sessionId, l);
 		} catch (IcatException_Exception e) {
-			throw new ICATClientException(e);
+			throw new ICATDataException(e);
 		}
 	}
 	
