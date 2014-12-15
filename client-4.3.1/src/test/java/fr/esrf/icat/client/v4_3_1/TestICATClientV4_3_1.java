@@ -29,6 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import org.icatproject_4_3_1.Datafile;
 import org.icatproject_4_3_1.Dataset;
 import org.icatproject_4_3_1.IcatException_Exception;
 import org.junit.After;
@@ -206,12 +207,28 @@ public class TestICATClientV4_3_1 {
 	
 	@Test
 	public void testUpdateDatafile() throws Exception {
-		final WrappedEntityBean bean = client.get("Datafile INCLUDE 1", 818);
 		
-		bean.set("description", "test");
+		long idi = client.createInvestigation("dummyInvestigation", "MA", "dummyVisit", "dummy title", "ID19", new GregorianCalendar());
+		long idd = client.createDataset("dummyInvestigation", "dummyVisit", "dummySample", "dummy dataset", "/dummy/location", new GregorianCalendar(), new GregorianCalendar(), null);
+		
+		long idf = client.createDatafile(idd, "filename", "/file/location", "edf", 0L);
+		
+		final WrappedEntityBean bean = client.get("Datafile INCLUDE 1", idf);
+		
+		final String descValue = "test";
+		bean.set("description", descValue);
 		
 		client.update(bean);
 		
+		try {
+			Datafile resultInv = (Datafile) client.getRaw("Datafile INCLUDE 1", idf);
+			assertTrue("Descriptions not changed", descValue.equals(resultInv.getDescription()));
+		} catch (IcatException_Exception e) {
+			e.printStackTrace();
+			fail();
+		} finally {
+			client.deleteEntities(ICATClientImpl.ENTITY_INVESTIGATION, idi); // cascade to dataset
+		}
 	}
 
 }

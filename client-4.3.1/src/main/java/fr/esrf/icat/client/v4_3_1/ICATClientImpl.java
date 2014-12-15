@@ -260,7 +260,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			createInvestigationInstrumentIfAbsent(inst, icatInvestigation);
 			return icatInvestigation.getId();
 		} catch (IcatException_Exception e) {
-			LOG.error("Unable to create investigation [" + name + ", " + type + ", " + visit + ", " + title + "]:" + e.getMessage());
+			LOG.error("Unable to create investigation [" + name + ", " + type + ", " + visit + ", " + title + "]: " + e.getMessage());
 			throw new ICATDataException(e);
 		}
 	}
@@ -279,7 +279,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			inv.setSummary(description);
 			update(inv);
 		} catch (IcatException_Exception e) {
-			LOG.error("Unable to update investigation [" + name + ", " + visit + "]:" + e.getMessage());
+			LOG.error("Unable to update investigation [" + name + ", " + visit + "]: " + e.getMessage());
 			throw new ICATDataException(e);
 		}
 	}
@@ -327,7 +327,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			icat.createMany(sessionId, ivUsers);
 			return newUserIds;
 		} catch (IcatException_Exception e) {
-			LOG.error("Unable to add user to investigation [" + name + ", " + visit + "]:" + e.getMessage());
+			LOG.error("Unable to add user to investigation [" + name + ", " + visit + "]: " + e.getMessage());
 			throw new ICATDataException(e);
 		}
 	}
@@ -382,7 +382,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			}
 			return dts_id;
 		} catch (IcatException_Exception e) {
-			LOG.error("Unable to create dataset [" + investigation + ", " + visit + ", " + name + ", " + location + "]:" + e.getMessage());
+			LOG.error("Unable to create dataset [" + investigation + ", " + visit + ", " + name + ", " + location + "]: " + e.getMessage());
 			throw new ICATDataException(e);
 		}
 	}
@@ -439,7 +439,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			dtf.setFileSize(size);
 			return create(dtf);
 		} catch (IcatException_Exception e) {
-			LOG.error("Unable to create datafile [" + datasetID + ", " + filename + ", " + location+ ", " + format + "]:" + e.getMessage());
+			LOG.error("Unable to create datafile [" + datasetID + ", " + filename + ", " + location+ ", " + format + "]: " + e.getMessage());
 			throw new ICATDataException(e);
 		}
 	}
@@ -467,7 +467,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			
 			icat.createMany(sessionId, dtfCollection);
 		} catch (IcatException_Exception e) {
-			LOG.error("Unable to create datafiles for dataset [" + datasetID + "]:" + e.getMessage());
+			LOG.error("Unable to create datafiles for dataset [" + datasetID + "]: " + e.getMessage());
 			throw new ICATDataException(e);
 		}
 	}
@@ -497,7 +497,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			}
 			return create(dtsparam);
 		} catch (IcatException_Exception e) {
-			LOG.error("Unable to create dataset parameter [" + datasetID + ", " + parameter + ", " + value + "]:" + e.getMessage());
+			LOG.error("Unable to create dataset parameter [" + datasetID + ", " + parameter + ", " + value + "]: " + e.getMessage());
 			throw new ICATDataException(e);
 		}
 	}
@@ -535,7 +535,7 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			
 			icat.createMany(sessionId, dtspCollection);
 		} catch (IcatException_Exception e) {
-			LOG.error("Unable to create dataset parameters for dataset [" + datasetID + "]:" + e.getMessage());
+			LOG.error("Unable to create dataset parameters for dataset [" + datasetID + "]: " + e.getMessage());
 			throw new ICATDataException(e);
 		}
 	}

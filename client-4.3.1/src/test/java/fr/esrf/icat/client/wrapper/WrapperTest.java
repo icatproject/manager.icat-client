@@ -26,6 +26,7 @@ import static org.junit.Assert.*;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
 
@@ -125,15 +126,19 @@ public class WrapperTest {
 	
 	@Test
 	public void testUpate() throws Exception {
-		WrappedEntityBean w = client.get("Investigation INCLUDE 1", 729);
+		
+		long idi = client.createInvestigation("TEST1234", "TEST", "id19", "dis is a test", "id19", (GregorianCalendar) GregorianCalendar.getInstance());
+		
+		WrappedEntityBean w = client.get("Investigation INCLUDE 1", idi);
 		Object desc = w.get("title");
 		String newDesc = desc.toString() + "_updated";
 		w.set("title", newDesc);
 		
-		assertEquals("Description changed !", desc, ((Investigation)client.getRaw("Investigation", 729)).getTitle());
+		assertEquals("Description changed !", desc, ((Investigation)client.getRaw("Investigation", idi)).getTitle());
 		client.update(w);
-		assertEquals("Description not updated !", newDesc, ((Investigation)client.getRaw("Investigation", 729)).getTitle());
+		assertEquals("Description not updated !", newDesc, ((Investigation)client.getRaw("Investigation", idi)).getTitle());
 		
+		client.deleteEntities("Investigation", idi);
 	}
 	
 	@Test

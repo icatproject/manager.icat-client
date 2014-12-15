@@ -30,6 +30,7 @@ import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import fr.esrf.icat.client.SimpleICATClient;
@@ -74,6 +75,7 @@ public class DynamicClientTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testUpdateDatafile() throws Exception {
 		final WrappedEntityBean bean = client.get("Datafile INCLUDE 1", 818);
 		bean.set("description", "test");

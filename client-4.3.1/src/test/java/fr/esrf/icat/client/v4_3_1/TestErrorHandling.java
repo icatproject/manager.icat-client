@@ -1,7 +1,5 @@
 package fr.esrf.icat.client.v4_3_1;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 

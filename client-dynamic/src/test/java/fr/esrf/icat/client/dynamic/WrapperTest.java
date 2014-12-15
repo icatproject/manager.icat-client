@@ -78,14 +78,23 @@ public class WrapperTest {
 	
 	@Test
 	public void testUpate() throws Exception {
-		WrappedEntityBean w = client.get("Investigation INCLUDE 1", 729);
+		WrappedEntityBean inv = client.create("Investigation");
+		inv.set("name", "TEST1234");
+		inv.set("title", "dis is an investigation");
+		inv.set("visitId", "id19");
+		inv.set("facility", client.get("Facility", 390));
+		inv.set("type", client.get("InvestigationType", 1));
+		long idi = client.create(inv);
+		WrappedEntityBean w = client.get("Investigation INCLUDE 1", idi);
 		Object desc = w.get("title");
 		String newDesc = desc.toString() + "_updated";
 		w.set("title", newDesc);
 		
 		client.update(w);
-		WrappedEntityBean w2 = client.get("Investigation INCLUDE 1", 729);
+		WrappedEntityBean w2 = client.get("Investigation INCLUDE 1", idi);
 		assertEquals("Description not updated", newDesc, w2.get("title"));
+		
+		client.deleteEntities("Investigation", idi);
 	}
 	
 	@Test
