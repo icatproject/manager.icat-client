@@ -171,7 +171,18 @@ public class WrapperTest {
 		} catch (Exception e) {
 			// pass
 		}
+	}
+	
+	@Test
+	public void testCreate() throws Exception {
+		WrappedEntityBean inv = client.create("Investigation");
+		inv.set("name", "TEST1234");
+		inv.set("title", "dis is an investigation");
+		inv.set("visitId", "id19");
+		inv.set("facility", client.get("Facility", 390));
+		inv.set("type", client.get("InvestigationType", 1));
+		long idi = client.create(inv);
 		
-		
+		assertEquals("Bean id not set by create", idi, (long) inv.get("id"));
 	}
 }

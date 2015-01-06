@@ -352,7 +352,10 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 	public long create(final WrappedEntityBean bean) throws ICATClientException {
 		checkConnection();
 		try {
-			return (long) client.invoke("create", sessionId, bean.getWrapped())[0];
+			final Object o = bean.getWrapped();
+			final long lid = (long) client.invoke("create", sessionId, o)[0];
+			o.getClass().getMethod("setId", Long.class).invoke(o, lid);
+			return lid;
 		} catch (Exception e) {
 			throw new ICATClientException(e);
 		}
