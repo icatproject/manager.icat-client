@@ -184,5 +184,7 @@ public class WrapperTest {
 		long idi = client.create(inv);
 		
 		assertEquals("Bean id not set by create", idi, (long) inv.get("id"));
+
+		client.deleteEntities("Investigation", idi);
 	}
 }
