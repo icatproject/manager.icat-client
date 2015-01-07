@@ -490,7 +490,14 @@ public class ICATClientImpl extends ICATClientSkeleton {
 			dtsparam.setType(type);
 			ParameterValueType valueType = type.getValueType();
 			if(valueType.equals(ParameterValueType.NUMERIC)) {
-				Double dvalue = PARAMETER_ERROR_STRING.equals(value) ? -1d : Double.parseDouble(value);
+				Double dvalue = -1d;
+				if(!PARAMETER_ERROR_STRING.equals(value)) {
+					try {
+						dvalue = Double.parseDouble(value);
+					} catch(NumberFormatException e) {
+						LOG.error("Error parsing numeric value {}: {}", value, e.getMessage());
+					}
+				}
 				dtsparam.setNumericValue(dvalue);
 			} else {
 				dtsparam.setStringValue(value);
@@ -525,7 +532,14 @@ public class ICATClientImpl extends ICATClientSkeleton {
 				ParameterValueType valueType = type.getValueType();
 				final String value = dtspd.getValue();
 				if(valueType.equals(ParameterValueType.NUMERIC)) {
-					Double dvalue = PARAMETER_ERROR_STRING.equals(value) ? -1d : Double.parseDouble(value);
+					Double dvalue = -1d;
+					if(!PARAMETER_ERROR_STRING.equals(value)) {
+						try {
+							dvalue = Double.parseDouble(value);
+						} catch(NumberFormatException e) {
+							LOG.error("Error parsing numeric value {}: {}", value, e.getMessage());
+						}
+					}
 					dtsparam.setNumericValue(dvalue);
 				} else {
 					dtsparam.setStringValue(value);
