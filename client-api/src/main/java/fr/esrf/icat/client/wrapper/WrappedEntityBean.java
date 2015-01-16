@@ -29,6 +29,7 @@ import java.util.List;
 
 public class WrappedEntityBean {
 
+	public static final String ID_FIELD = "id";
 	private final Object wrapped;
 	private final BeanFieldMapping mapping;
 	
@@ -124,5 +125,35 @@ public class WrappedEntityBean {
 	public Class<?> getReturnType(final String field) {
 		return mapping.getReturnType(field);
 	}
+
+	@Override
+	public int hashCode() {
+		return getId().hashCode();
+	}
+
+	/**
+	 * Wrapped Beans are equals if they encapsulate the same object identified by its id.
+	 * In case of error accessing the id objects are considered different. 
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(null == obj) return false;
+		if(this == obj) return true;		
+		if (!(obj instanceof WrappedEntityBean)) return false;
+		WrappedEntityBean other = (WrappedEntityBean) obj;
+		return this.wrapped.getClass().equals(other.wrapped.getClass()) && this.getId().equals(other.getId());
+	}
+
+	private Object getId() {
+		try {
+			final Object object = this.get(ID_FIELD);
+			return object != null ? object : new Object(); // this way we are sure 2 wrapped beans with null ids won't be considered the same 
+		} catch (NoSuchMethodException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException e) {
+			return new Object(); // this way we are sure 2 wrapped beans giving an error won't be considered the same 
+		}
+	}
+	
+	
 	
 }

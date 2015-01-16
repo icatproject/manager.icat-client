@@ -78,23 +78,33 @@ public class WrapperTest {
 	
 	@Test
 	public void testUpate() throws Exception {
-		WrappedEntityBean inv = client.create("Investigation");
-		inv.set("name", "TEST1234");
-		inv.set("title", "dis is an investigation");
-		inv.set("visitId", "id19");
-		inv.set("facility", client.get("Facility", 390));
-		inv.set("type", client.get("InvestigationType", 1));
-		long idi = client.create(inv);
-		WrappedEntityBean w = client.get("Investigation INCLUDE 1", idi);
-		Object desc = w.get("title");
-		String newDesc = desc.toString() + "_updated";
-		w.set("title", newDesc);
-		
-		client.update(w);
-		WrappedEntityBean w2 = client.get("Investigation INCLUDE 1", idi);
-		assertEquals("Description not updated", newDesc, w2.get("title"));
-		
-		client.deleteEntities("Investigation", idi);
+		long idi = -1;
+		try {
+			WrappedEntityBean inv = client.create("Investigation");
+			inv.set("name", "TEST1234");
+			inv.set("title", "dis is an investigation");
+			inv.set("visitId", "id19");
+			inv.set("facility", client.get("Facility", 390));
+			inv.set("type", client.get("InvestigationType", 1));
+			idi = client.create(inv);
+			WrappedEntityBean w = client.get("Investigation INCLUDE 1", idi);
+			Object desc = w.get("title");
+			String newDesc = desc.toString() + "_updated";
+			w.set("title", newDesc);
+			
+			client.update(w);
+			WrappedEntityBean w2 = client.get("Investigation INCLUDE 1", idi);
+			assertEquals("Description not updated", newDesc, w2.get("title"));
+			
+		} finally {
+			if(idi >= 0) {
+				try {
+					client.deleteEntities("Investigation", idi);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	@Test
@@ -175,16 +185,68 @@ public class WrapperTest {
 	
 	@Test
 	public void testCreate() throws Exception {
-		WrappedEntityBean inv = client.create("Investigation");
-		inv.set("name", "TEST1234");
-		inv.set("title", "dis is an investigation");
-		inv.set("visitId", "id19");
-		inv.set("facility", client.get("Facility", 390));
-		inv.set("type", client.get("InvestigationType", 1));
-		long idi = client.create(inv);
-		
-		assertEquals("Bean id not set by create", idi, (long) inv.get("id"));
+		long idi = -1;
+		try {
+			WrappedEntityBean inv = client.create("Investigation");
+			inv.set("name", "TEST1234");
+			inv.set("title", "dis is an investigation");
+			inv.set("visitId", "id19");
+			inv.set("facility", client.get("Facility", 390));
+			inv.set("type", client.get("InvestigationType", 1));
+			idi = client.create(inv);
+			
+			assertEquals("Bean id not set by create", idi, (long) inv.get("id"));
+			
+		} finally {
+			if(idi >= 0) {
+				try {
+					client.deleteEntities("Investigation", idi);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 
-		client.deleteEntities("Investigation", idi);
+	}
+	
+	@Test
+	public void testEquals() throws Exception {
+		long idi = -1;
+		try {
+			WrappedEntityBean inv = client.create("Investigation");
+			inv.set("name", "TEST1234");
+			inv.set("title", "dis is an investigation");
+			inv.set("visitId", "id19");
+			inv.set("facility", client.get("Facility", 390));
+			inv.set("type", client.get("InvestigationType", 1));
+			
+			assertNotEquals("Wrapped object should not equal null", inv, null);
+			assertEquals("Wrapped object should be equal to itself", inv, inv);
+			
+			WrappedEntityBean inv2 = client.create("Investigation");
+			inv2.set("name", "TEST1234");
+			inv2.set("title", "dis is an investigation");
+			inv2.set("visitId", "id19");
+			inv2.set("facility", client.get("Facility", 390));
+			inv2.set("type", client.get("InvestigationType", 1));
+	
+			assertNotEquals("Entities with no id should be different", inv, inv2);
+			
+			idi = client.create(inv);
+	
+			WrappedEntityBean returned = client.get("Investigation", idi);
+			
+			assertEquals("Wrapped entities should be equals if the entities have the same id", inv, returned);
+	
+			assertNotEquals("Entity with id should be different from another with no id", inv, inv2);
+		} finally {
+			if(idi >= 0) {
+				try {
+					client.deleteEntities("Investigation", idi);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }
