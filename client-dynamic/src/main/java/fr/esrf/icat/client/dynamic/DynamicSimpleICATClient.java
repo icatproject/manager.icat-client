@@ -79,6 +79,8 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 	
 	private List<String> entityList;
 	
+	private ClassLoader _classLoader;
+	
 	public DynamicSimpleICATClient() {
 		super();
 		entityList = null;
@@ -179,6 +181,8 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 				throw new IllegalStateException("Minimum supported version is " + MINIMUM_SUPPORTED_VERSION);
 			}
 			
+			_classLoader = Thread.currentThread().getContextClassLoader();
+			
 		} catch (Exception e) {
 			LOG.error("Unable to initialise dynamic client:" + e.getMessage());
 			throw new IllegalStateException("Unable to initialise DynamicSimpleICATClient", e);
@@ -205,14 +209,13 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 		LOG.debug("Connecting to ICAT as '" + getIcatUsername() + "'");
 
 		try {
-			final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-			final Class<?> loginClass = contextClassLoader.loadClass(packageName + ".Login");
-			final Class<?> credentialsClass = contextClassLoader.loadClass(packageName + ".Login$Credentials");
+			final Class<?> loginClass = _classLoader.loadClass(packageName + ".Login");
+			final Class<?> credentialsClass = _classLoader.loadClass(packageName + ".Login$Credentials");
 			final Object credentials = credentialsClass.newInstance();
 			
 			final Object entries = credentialsClass.getMethod("getEntry", (Class<?>[]) null).invoke(credentials, (Object[])null);
 			
-			final Class<?> entryClass = contextClassLoader.loadClass(packageName + ".Login$Credentials$Entry");
+			final Class<?> entryClass = _classLoader.loadClass(packageName + ".Login$Credentials$Entry");
 			
 			final Class<?>[] stringParam = new Class<?>[]{String.class};
 
@@ -341,8 +344,7 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 	@Override
 	public WrappedEntityBean create(final String entity) throws ICATClientException {
 		try {
-			return new WrappedEntityBean(Thread.currentThread().getContextClassLoader()
-					.loadClass(packageName + "." + StringUtils.capitalize(entity)).newInstance());
+			return new WrappedEntityBean(_classLoader.loadClass(packageName + "." + StringUtils.capitalize(entity)).newInstance());
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			throw new ICATClientException(e);
 		}
@@ -407,11 +409,10 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 
 	protected final List<String> createEntityNames() throws ClassNotFoundException {
 		if(null == fileNameList) return null;
-		final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-		final Class<?> entityClass = contextClassLoader.loadClass(packageName + ".EntityBaseBean");
+		final Class<?> entityClass = _classLoader.loadClass(packageName + ".EntityBaseBean");
 		final List<String> rep = new LinkedList<>();
 		for(String name : fileNameList) {
-			Class<?> clazz = contextClassLoader.loadClass(packageName + "." + name);
+			Class<?> clazz = _classLoader.loadClass(packageName + "." + name);
 			if(entityClass.isAssignableFrom(clazz) && !Modifier.isAbstract(clazz.getModifiers())) {
 				rep.add(name);
 			}
