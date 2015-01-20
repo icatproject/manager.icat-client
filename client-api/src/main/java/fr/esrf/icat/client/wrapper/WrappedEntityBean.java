@@ -23,6 +23,8 @@ package fr.esrf.icat.client.wrapper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -156,6 +158,21 @@ public class WrappedEntityBean {
 	
 	public String getEntityName() {
 		return wrapped.getClass().getSimpleName();
+	}
+	
+	public String getAssociatedEntityName(final String field) throws NoSuchMethodException {
+		if(isEntity(field)) {
+			return getReturnType(field).getClass().getSimpleName();
+		} else if(isAssociation(field)) {
+			final Type genericReturnType = mapping.getGetter(field).getGenericReturnType();
+			if(genericReturnType instanceof ParameterizedType) {
+			    return ((Class<?>)((ParameterizedType) genericReturnType).getActualTypeArguments()[0]).getSimpleName();
+			} else {
+				throw new NoSuchMethodException("Field " + field + " returns a plain collection");
+			}
+		} else {
+			throw new NoSuchMethodException("Field " + field + " is not an associated entity");
+		}
 	}
 	
 }

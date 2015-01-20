@@ -249,4 +249,15 @@ public class WrapperTest {
 			}
 		}
 	}
+	
+	@Test
+	public void testReturnTypes() throws Exception {
+		WrappedEntityBean w = client.get("Facility INCLUDE InvestigationType", 390);
+		
+		assertEquals("Wrong entity name", "Facility", w.getEntityName());
+		
+		assertEquals("Wrong entity name", "InvestigationType", w.getAssociatedEntity("investigationTypes"));
+
+	
+	}
 }
