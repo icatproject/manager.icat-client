@@ -154,6 +154,8 @@ public class WrappedEntityBean {
 		}
 	}
 	
-	
+	public String getEntityName() {
+		return wrapped.getClass().getSimpleName();
+	}
 	
 }
