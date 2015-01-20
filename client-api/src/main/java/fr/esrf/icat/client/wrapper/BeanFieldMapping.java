@@ -52,6 +52,7 @@ public class BeanFieldMapping {
 	private final Map<String, Class<?>> _fieldTypes;
 	private final Map<String, Method> _setters;
 	private final Map<String, Method> _getters;
+	private final Class<?> _clazz;
 
 	public BeanFieldMapping(final Class<?> clazz) {
 		super();
@@ -62,6 +63,7 @@ public class BeanFieldMapping {
 		_fieldTypes = new HashMap<>();
 		_setters = new HashMap<>();
 		_getters = new HashMap<>();
+		_clazz = clazz;
 		LOG.debug("Processing class " + clazz.getName());
 		processClass(clazz);
 	}
@@ -183,5 +185,9 @@ public class BeanFieldMapping {
 
 	public Method getSetter(final String field) {
 		return _setters.get(field);
+	}
+	
+	public Class<?> getMappedClass() {
+		return _clazz;
 	}
 }

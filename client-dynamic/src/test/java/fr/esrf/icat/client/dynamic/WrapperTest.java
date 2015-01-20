@@ -258,6 +258,17 @@ public class WrapperTest {
 		
 		assertEquals("Wrong entity name", "InvestigationType", w.getAssociatedEntityName("investigationTypes"));
 
-	
+	}
+
+	@Test
+	public void testAssociationTypes() throws Exception {
+		WrappedEntityBean invt = client.create("InvestigationType");
+		
+		assertEquals("Wrong entity name", "InvestigationType", invt.getEntityName());
+		
+		assertEquals("Wrong associated name", "Investigation", invt.getAssociatedEntityName("investigations"));
+		
+		assertEquals("Wrong associated field", "type", invt.getAssociatedMethodName("investigations"));
+
 	}
 }

@@ -175,4 +175,30 @@ public class WrappedEntityBean {
 		}
 	}
 	
+	public String getAssociatedMethodName(final String field) throws NoSuchMethodException {
+		if(isAssociation(field)) {
+			final Type genericReturnType = mapping.getGetter(field).getGenericReturnType();
+			if(genericReturnType instanceof ParameterizedType) {
+				final Class<?> entityClass = (Class<?>)((ParameterizedType) genericReturnType).getActualTypeArguments()[0];
+				final BeanFieldMapping entityMapping = MappingManager.getInstance().getMapping(entityClass);
+				String methodName = null;
+				for(String entityField : entityMapping.getEntityFields()) {
+					if(entityMapping.getReturnType(entityField).equals(wrapped.getClass())) {
+						if(null == methodName) {
+							methodName = entityField; 
+						} else {
+							throw new NoSuchMethodException("Duplicate methods found in " + 
+									entityMapping.getMappedClass().getSimpleName() + " returning " + entityClass.getSimpleName());
+						}
+					}
+				}
+				return methodName;
+			} else {
+				throw new NoSuchMethodException("Field " + field + " returns a plain collection");
+			}
+		} else {
+			throw new NoSuchMethodException("Field " + field + " is not an associated entity");
+		}
+	}
+	
 }
