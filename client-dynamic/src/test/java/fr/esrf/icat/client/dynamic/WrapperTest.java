@@ -256,7 +256,7 @@ public class WrapperTest {
 		
 		assertEquals("Wrong entity name", "Facility", w.getEntityName());
 		
-		assertEquals("Wrong entity name", "InvestigationType", w.getAssociatedEntity("investigationTypes"));
+		assertEquals("Wrong entity name", "InvestigationType", w.getAssociatedEntityName("investigationTypes"));
 
 	
 	}
