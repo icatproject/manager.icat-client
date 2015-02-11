@@ -35,6 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -81,20 +82,45 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 	
 	private ClassLoader _classLoader;
 	
+	private CountDownLatch initLatch;
+	
+	private volatile boolean initDone;
+	
+	private Exception initException;
+	
 	public DynamicSimpleICATClient() {
 		super();
-		entityList = null;
-	}
-
-	@Override
-	public void doInit() {
-		InputStream urlStream = null;
-		BufferedReader reader = null;
-		BufferedWriter writer = null;
-		
 		if (!ModifiedDynamicClientFactory.isCompilerAvailable()) {
 			throw new IllegalStateException("This program needs a JDK to run !\nPlease see the README.txt file for how to configure it.");
 		}
+		entityList = null;
+		initDone = false;
+		initException = null;
+		initLatch = new CountDownLatch(1);
+	}
+
+	@Override
+	public void setIcatBaseUrl(final String icatBaseUrl) {
+		super.setIcatBaseUrl(icatBaseUrl);
+		// if we have already done the init thre 
+		if(initDone) {
+			throw new IllegalStateException("This client does not support changing the ICAT URL once initialized.");
+		}
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				LOG.debug("Starting client initialisation in background");
+				initializeClient();
+				LOG.debug("Background client initialisation done");
+			}
+		}).start();
+	}
+
+
+	private void initializeClient() {
+		InputStream urlStream = null;
+		BufferedReader reader = null;
+		BufferedWriter writer = null;
 		
 		try {
 			final String icatBaseUrl = getIcatBaseUrl();
@@ -174,22 +200,38 @@ public class DynamicSimpleICATClient extends SimpleICATClientSkeleton {
 			client = clientFactory.createClient(modifiedWSDL.toURI().toURL(), qName, bindings);
 			fileNameList = clientFactory.getClassNameList();
 
-			version_string = client.invoke("getApiVersion", (Object) null)[0].toString();
-			LOG.debug("ICAT Version: "+ version_string);
-			
-			if(!isVersionAbove(MINIMUM_SUPPORTED_VERSION)) {
-				throw new IllegalStateException("Minimum supported version is " + MINIMUM_SUPPORTED_VERSION);
-			}
-			
 			_classLoader = Thread.currentThread().getContextClassLoader();
 			
 		} catch (Exception e) {
 			LOG.error("Unable to initialise dynamic client:" + e.getMessage());
-			throw new IllegalStateException("Unable to initialise DynamicSimpleICATClient", e);
+			initException = e;
 		} finally {
+			initDone = true;
+			initLatch.countDown();
 			close(urlStream);
 			close(reader);
 			close(writer);
+		}
+	}
+
+	@Override
+	public void doInit() {
+		try {
+			LOG.debug("Waiting for client initialisation ...");
+			initLatch.await();
+			if(null != initException) {
+				throw new IllegalStateException("Unable to initialise dynamic client:", initException);
+			}
+			LOG.debug("... client initialisation done, waiting ends.");
+			version_string = client.invoke("getApiVersion", (Object) null)[0].toString();
+			LOG.debug("ICAT Version: "+ version_string);
+		} catch (InterruptedException e) {
+			throw new IllegalStateException("Interrupted while waiting for client initialisationn how rude !", e);
+		} catch (Exception e) {
+			throw new IllegalStateException("Error while checking client is correctly initialised", e);
+		}
+		if(!isVersionAbove(MINIMUM_SUPPORTED_VERSION)) {
+			throw new IllegalStateException("Minimum supported version is " + MINIMUM_SUPPORTED_VERSION);
 		}
 	}
 
