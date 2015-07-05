@@ -46,10 +46,6 @@
 		<artifactId>junit</artifactId>
 	</dependency>
 	<dependency>
-	  <groupId>de.rosstauscher.proxy_vole</groupId>
-	  <artifactId>proxy_vole</artifactId>
-	</dependency>
-	<dependency>
 		<groupId>org.apache.commons</groupId>
 		<artifactId>commons-lang3</artifactId>
 	</dependency>
