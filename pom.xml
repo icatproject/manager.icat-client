@@ -17,9 +17,9 @@
   <inceptionYear>2014</inceptionYear>
 
   <scm>
-  	<developerConnection>scm:git:git@gitlab.esrf.fr:icat/icat-client.git</developerConnection>
-  	<connection>scm:git:http://gitlab.esrf.fr/icat/icat-client.git</connection>
-  	<url>http://gitlab.esrf.fr/icat/icat-client</url>
+  	<developerConnection>scm:git:git@github.com:icatproject/manager.icat-client.git</developerConnection>
+  	<connection>scm:git:https://github.com/icatproject/manager.icat-client.git</connection>
+  	<url>https://github.com/icatproject/manager.icat-client</url>
     <tag>HEAD</tag>
   </scm>
 
