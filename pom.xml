@@ -5,7 +5,7 @@
   <parent>
   	<groupId>fr.esrf.icat</groupId>
   	<artifactId>icat-super-pom</artifactId>
-  	<version>1.7</version>
+  	<version>1.8-SNAPSHOT</version>
   </parent>
 
   <artifactId>icat-client-parent</artifactId>
@@ -42,13 +42,6 @@
   			<version>4.11</version>
   			<scope>test</scope>
   		</dependency>
-		<dependency>
-		  <groupId>de.rosstauscher.proxy_vole</groupId>
-		  <artifactId>proxy_vole</artifactId>
-		  <version>1.0.1-local</version>
-		  <scope>test</scope>
-		</dependency>
-
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
